@@ -4,18 +4,16 @@
 library dart_hetimanet.test;
 
 import 'package:unittest/unittest.dart';
-import 'package:dart_hetimanet/dart_hetimanet.dart';
+import 'package:hetimanet/hetimanet.dart';
 
 main() {
   group('A group of tests', () {
-    Awesome awesome;
-
     setUp(() {
-      awesome = new Awesome();
     });
 
     test('First Test', () {
-      expect(awesome.isAwesome, isTrue);
+      TestNet n = new TestNet();
+      print("${n.hello}");
     });
   });
 }

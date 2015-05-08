@@ -4,8 +4,8 @@
 /// The dart_hetimanet library.
 ///
 /// This is an awesome library. More dartdocs go here.
-library dart_hetimanet;
+library hetimanet;
 
 // TODO: Export any libraries intended for clients of this package.
 
-export 'src/dart_hetimanet_base.dart';
+export 'src/hetimanet.dart';

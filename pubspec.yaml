@@ -1,9 +1,10 @@
-name: dart_hetimanet
-description: A starting point for Dart libraries or applications.
+name: hetimanet
 version: 0.0.1
-#author: <your name> <email@example.com>
-#homepage: https://www.example.com
-#dependencies:
-#  lib_name: any
+description: A starting point for Dart libraries or applications.
+dependencies:
+  hetimacore:
+    git: https://github.com/kyorohiro/dart_hetimacore
+  hetimaregex:
+    git: https://github.com/kyorohiro/dart_hetimaregex
 dev_dependencies:
   unittest: '>=0.11.0 <0.12.0'
