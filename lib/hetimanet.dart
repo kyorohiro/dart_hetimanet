@@ -8,4 +8,4 @@ library hetimanet;
 
 // TODO: Export any libraries intended for clients of this package.
 
-export 'src/hetimanet.dart';
+export 'src/net/hetisocket.dart';
