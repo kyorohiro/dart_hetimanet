@@ -1,4 +1,4 @@
-library hetimanet;
+library hetimanet.base;
 import 'dart:typed_data' as data;
 import 'dart:math' as math;
 import 'dart:convert' as convert;
