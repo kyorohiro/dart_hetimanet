@@ -5,6 +5,7 @@ library dart_hetimanet.test;
 
 import 'package:unittest/unittest.dart';
 import 'package:hetimanet/hetimanet.dart';
+import 'package:hetimanet/hetimanet_chrome.dart';
 
 main() {
   group('A group of tests', () {
@@ -12,8 +13,14 @@ main() {
     });
 
     test('First Test', () {
-      TestNet n = new TestNet();
-      print("${n.hello}");
+      HetiSocketBuilder builder = new HetiSocketBuilderChrome();
+      HetiSocket socket = builder.createClient();
+      socket.onReceive().listen((HetiReceiveInfo i) {
+        
+      });
+      socket.send([]).then((HetiSendInfo i) {
+        
+      });
     });
   });
 }
