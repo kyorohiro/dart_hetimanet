@@ -5,7 +5,7 @@ class HetiHttpClientResponse {
   HetimaBuilder body;
   int getContentLength() {
     HetiHttpResponseHeaderField contentLength = message.find(RfcTable.HEADER_FIELD_CONTENT_LENGTH);
-    if (contentLength == null) {
+    if (contentLength != null) {
       try {
         return int.parse(contentLength.fieldValue);
       } catch (e) {
