@@ -1,12 +1,10 @@
 part of hetimanet.chrome;
 
-
 class HetiSocketChrome extends HetiSocket {
   int clientSocketId;
   async.StreamController<HetiReceiveInfo> _controller = new async.StreamController();
 
-  HetiSocketChrome.empty() {
-  }
+  HetiSocketChrome.empty() {}
 
   HetiSocketChrome(int _clientSocketId) {
     HetiChromeSocketManager.getInstance().addClient(_clientSocketId, this);
@@ -43,16 +41,18 @@ class HetiSocketChrome extends HetiSocket {
 
   async.Future<HetiSocket> connect(String peerAddress, int peerPort) {
     async.Completer<HetiSocket> completer = new async.Completer();
-    new async.Future.sync(() {
-      chrome.sockets.tcp.create().then((chrome.CreateInfo info) {
-        chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort).then((int e) {
-          {
-            chrome.sockets.tcp.setPaused(info.socketId, false);
-            clientSocketId = info.socketId;
-            HetiChromeSocketManager.getInstance().addClient(info.socketId, this);
-            completer.complete(this);
-          }
-        });
+   // print("### connect 001 ${chrome.sockets.tcp}");
+    chrome.SocketProperties properties = new chrome.SocketProperties();
+    chrome.sockets.tcp.create(properties).then((chrome.CreateInfo info) {
+     // print("### connect 002 ${info}");
+      return chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort).then((int e) {
+       // print("### connect 003 ${e}");
+        {
+          chrome.sockets.tcp.setPaused(info.socketId, false);
+          clientSocketId = info.socketId;
+          HetiChromeSocketManager.getInstance().addClient(info.socketId, this);
+          completer.complete(this);
+        }
       });
     }).catchError((e) {
       print(e.toString());
@@ -75,4 +75,3 @@ class HetiSocketChrome extends HetiSocket {
   }
   bool _isClose = false;
 }
-

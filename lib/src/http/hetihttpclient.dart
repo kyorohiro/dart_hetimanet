@@ -30,12 +30,19 @@ class HetiHttpClient {
     port = _port;
     async.Completer<int> completer = new async.Completer();
     socket = _builder.createClient();
+    if(socket == null) {
+      completer.completeError(new Exception(""));
+      return completer.future;
+    }
+    print("###connet ${socket}");
     socket.connect(host, port).then((HetiSocket socket) {
       if (socket == null) {
-        completer.complete(-999);
+        completer.completeError(new Exception(""));
       } else {
         completer.complete(1);
       }
+    }).catchError((e){
+      completer.completeError(e);
     });
     return completer.future;
   }
