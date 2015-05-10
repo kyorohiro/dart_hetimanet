@@ -10,7 +10,8 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
   async.Future<int> bind(String address, int port) {
     chrome.sockets.udp.onReceive.listen(onReceiveInternal);
     async.Completer<int> completer = new async.Completer();
-    chrome.sockets.udp.create().then((chrome.CreateInfo info) {
+    chrome.SocketProperties properties = new chrome.SocketProperties();
+    chrome.sockets.udp.create(properties).then((chrome.CreateInfo info) {
       _info = info;
       HetiChromeSocketManager.getInstance().addUdp(info.socketId, this);
       return chrome.sockets.udp.setMulticastLoopbackMode(_info.socketId, true);
