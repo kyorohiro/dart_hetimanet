@@ -1,4 +1,4 @@
-part of hetimanet.util;
+part of hetimanet.upnp;
 
 class UpnpPortMappingSample {
   List<UPnpPPPDevice> foundPPPDevice = new List();

@@ -1,4 +1,4 @@
-part of hetimanet.util;
+part of hetimanet.upnp;
 
 class UPnpDeviceInfo {
   static final String KEY_ST = "ST";

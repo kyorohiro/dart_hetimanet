@@ -1,4 +1,4 @@
-part of hetimanet.util;
+part of hetimanet.upnp;
 
 class UPnpPPPDevice {
 //  static final String KEY_SOAPACTION = "SOAPACTION";
