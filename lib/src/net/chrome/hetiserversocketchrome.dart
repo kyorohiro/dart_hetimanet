@@ -5,7 +5,8 @@ class HetiServerSocketChrome extends HetiServerSocket {
   static async.Future<HetiServerSocket> startServer(String address, int port) {
     async.Completer<HetiServerSocket> completer = new async.Completer();
     new async.Future.sync(() {
-      return chrome.sockets.tcpServer.create().then((chrome.CreateInfo info) {
+      chrome.SocketProperties properties = new chrome.SocketProperties();
+      return chrome.sockets.tcpServer.create(properties).then((chrome.CreateInfo info) {
         HetiChromeSocketManager.getInstance();
         return chrome.sockets.tcpServer.listen(info.socketId, address, port).then((int backlog) {
           HetiServerSocketChrome server = new HetiServerSocketChrome._internal(info);
