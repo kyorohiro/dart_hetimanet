@@ -1,8 +1,6 @@
-library hetimanet.rfctable;
+part of hetimanet.util;
 
-import 'dart:typed_data' as data;
-import 'dart:math' as math;
-import 'dart:convert' as convert;
+
 
 class RfcTable {
   static const String HEADER_FIELD_CONTENT_LENGTH = "Content-Length";
