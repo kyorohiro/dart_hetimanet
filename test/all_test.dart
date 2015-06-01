@@ -4,10 +4,12 @@
 library dart_hetimanet.test;
 
 import 'package:unittest/unittest.dart';
+import 'package:hetimacore/hetimacore.dart';
 import 'package:hetimanet/hetimanet.dart';
-import 'package:hetimanet/hetimanet_chrome.dart';
+//import 'package:hetimanet/hetimanet_chrome.dart';
 
 main() {
+  /*
   group('A group of tests', () {
     setUp(() {
     });
@@ -23,4 +25,5 @@ main() {
       });
     });
   });
+   */
 }

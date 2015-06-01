@@ -6,6 +6,7 @@ import 'package:hetimacore/hetimacore.dart';
 import '../net/hetisocket.dart';
 import '../util/hetiutil.dart';
 import 'hetihttpresponse.dart';
+import 'chunkedbuilderadapter.dart';
 
 class HetiHttpClientResponse {
   HetiHttpMessageWithoutBody message;
@@ -15,8 +16,7 @@ class HetiHttpClientResponse {
     if (contentLength != null) {
       try {
         return int.parse(contentLength.fieldValue);
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     return -1;
   }
@@ -37,7 +37,7 @@ class HetiHttpClient {
     port = _port;
     async.Completer<int> completer = new async.Completer();
     socket = _builder.createClient();
-    if(socket == null) {
+    if (socket == null) {
       completer.completeError(new Exception(""));
       return completer.future;
     }
@@ -48,7 +48,7 @@ class HetiHttpClient {
       } else {
         completer.complete(1);
       }
-    }).catchError((e){
+    }).catchError((e) {
       completer.completeError(e);
     });
     return completer.future;
@@ -58,7 +58,7 @@ class HetiHttpClient {
     async.Completer<HetiHttpClientResponse> completer = new async.Completer();
 
     Map<String, String> headerTmp = {};
-    headerTmp["Host"] = host+":"+port.toString();
+    headerTmp["Host"] = host + ":" + port.toString();
     headerTmp["Connection"] = "Close";
     if (header != null) {
       for (String key in header.keys) {
@@ -74,7 +74,7 @@ class HetiHttpClient {
     builder.appendString("\r\n");
 
     socket.onReceive().listen((HetiReceiveInfo info) {
-      print("Length"+path+":"+info.data.length.toString());
+      print("Length" + path + ":" + info.data.length.toString());
     });
     socket.send(builder.toList()).then((HetiSendInfo info) {});
 
@@ -89,7 +89,7 @@ class HetiHttpClient {
     async.Completer<HetiHttpClientResponse> completer = new async.Completer();
 
     Map<String, String> headerTmp = {};
-    headerTmp["Host"] = host+":"+port.toString();
+    headerTmp["Host"] = host + ":" + port.toString();
     headerTmp["Connection"] = "Close";
     if (header != null) {
       for (String key in header.keys) {
@@ -109,9 +109,9 @@ class HetiHttpClient {
 
     //
     builder.getLength().then((int len) {
-    builder.getByteFuture(0,len).then((List<int> data) {
-      print("request\r\n"+convert.UTF8.decode(data));
-    });
+      builder.getByteFuture(0, len).then((List<int> data) {
+        print("request\r\n" + convert.UTF8.decode(data));
+      });
     });
     //
     socket.onReceive().listen((HetiReceiveInfo info) {});
@@ -122,13 +122,13 @@ class HetiHttpClient {
   }
 
   //
-  // mpost
+  // mpost for upnp protocol
   //
   async.Future<HetiHttpClientResponse> mpost(String path, List<int> body, [Map<String, String> header]) {
     async.Completer<HetiHttpClientResponse> completer = new async.Completer();
 
     Map<String, String> headerTmp = {};
-    headerTmp["Host"] = host+":"+port.toString();
+    headerTmp["Host"] = host + ":" + port.toString();
     headerTmp["Connection"] = "Close";
     if (header != null) {
       for (String key in header.keys) {
@@ -148,9 +148,9 @@ class HetiHttpClient {
 
     //
     builder.getLength().then((int len) {
-    builder.getByteFuture(0,len).then((List<int> data) {
-      print("request\r\n"+convert.UTF8.decode(data));
-    });
+      builder.getByteFuture(0, len).then((List<int> data) {
+        print("request\r\n" + convert.UTF8.decode(data));
+      });
     });
     //
     socket.onReceive().listen((HetiReceiveInfo info) {});
@@ -167,18 +167,18 @@ class HetiHttpClient {
       result.message = message;
       //
       {
-        socket.buffer.getByteFuture(0, message.index).then((List<int> buffer){
-          print("response\r\n"+convert.UTF8.decode(buffer));
+        socket.buffer.getByteFuture(0, message.index).then((List<int> buffer) {
+          print("response\r\n" + convert.UTF8.decode(buffer));
         });
       }
-       //
+      //
       HetiHttpResponseHeaderField transferEncodingField = message.find("Transfer-Encoding");
       if (transferEncodingField == null || transferEncodingField.fieldValue != "chunked") {
         result.body = new HetimaBuilderAdapter(socket.buffer, message.index);
-        if(result.message.contentLength > 0) {
-         result.body.getByteFuture(message.index + result.message.contentLength-1, 1).then((e){
-           result.body.immutable = true;
-         });
+        if (result.message.contentLength > 0) {
+          result.body.getByteFuture(message.index + result.message.contentLength - 1, 1).then((e) {
+            result.body.immutable = true;
+          });
         } else {
           result.body.immutable = true;
         }

@@ -21,7 +21,6 @@ class HttpUrlDecoder {
   static List<int> PATH = convert.UTF8.encode(RfcTable.RFC3986_PCHAR_AS_STRING + "/");
   static List<int> QUERY = convert.UTF8.encode(RfcTable.RFC3986_RESERVED_AS_STRING + RfcTable.RFC3986_UNRESERVED_AS_STRING);
 
-
   static HttpUrlDecoder _sDecoder = new HttpUrlDecoder();
 
   static HttpUrl decodeUrl(String _url) {
@@ -116,6 +115,7 @@ class HttpUrlDecoder {
       pop();
     }
   }
+
   String query() {
     if (url.length <= index) {
       return "";
@@ -136,6 +136,7 @@ class HttpUrlDecoder {
       pop();
     }
   }
+
   int port() {
     try {
       push();
