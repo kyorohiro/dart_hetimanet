@@ -11,6 +11,6 @@ import '../util/hetiutil.dart';
 
 //import '../tmp/rfctable.dart';
 
-part 'hetihttpclient.dart';
-part 'hetihttpserver.dart';
-part 'hetihttpresponse.dart';
+export 'hetihttpclient.dart';
+export 'hetihttpserver.dart';
+export 'hetihttpresponse.dart';
