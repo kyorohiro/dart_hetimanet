@@ -1,10 +1,6 @@
 library hetimanet.base;
-import 'dart:typed_data' as data;
-import 'dart:math' as math;
-import 'dart:convert' as convert;
 import 'dart:async' as async;
 import 'package:hetimacore/hetimacore.dart' as heti;
-import 'package:hetimaregex/hetimaregex.dart' as hregex;
 
 abstract class HetiSocketBuilder {
   HetiSocket createClient();
