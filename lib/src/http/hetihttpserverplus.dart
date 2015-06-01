@@ -6,6 +6,8 @@ import 'package:hetimacore/hetimacore.dart';
 import '../net/hetisocket.dart';
 import '../util/hetiutil.dart';
 import 'hetihttp.dart';
+import 'hetihttpresponse.dart';
+import 'hetihttpserver.dart';
 import 'dart:typed_data' as typed_data;
 
 class HetiHttpServerPlusResponseItem {

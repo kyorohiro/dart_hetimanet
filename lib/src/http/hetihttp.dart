@@ -14,3 +14,4 @@ import '../util/hetiutil.dart';
 export 'hetihttpclient.dart';
 export 'hetihttpserver.dart';
 export 'hetihttpresponse.dart';
+export 'hetihttpserverplus.dart';
