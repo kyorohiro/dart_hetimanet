@@ -1,6 +1,8 @@
 part of hetimanet.chrome;
 
 class HetiSocketChrome extends HetiSocket {
+
+  bool _isClose = false;
   int clientSocketId;
   async.StreamController<HetiReceiveInfo> _controller = new async.StreamController();
 
@@ -12,12 +14,9 @@ class HetiSocketChrome extends HetiSocket {
     clientSocketId = _clientSocketId;
   }
 
-  async.Stream<HetiReceiveInfo> onReceive() {
-    return _controller.stream;
-  }
+  async.Stream<HetiReceiveInfo> onReceive() => _controller.stream;
 
   void onReceiveInternal(chrome.ReceiveInfo info) {
-    //core.print("--receive " + info.socketId.toString());
     updateTime();
     List<int> tmp = info.data.getBytes();
     buffer.appendIntList(tmp, 0, tmp.length);
@@ -41,23 +40,15 @@ class HetiSocketChrome extends HetiSocket {
 
   async.Future<HetiSocket> connect(String peerAddress, int peerPort) {
     async.Completer<HetiSocket> completer = new async.Completer();
-   // print("### connect 001 ${chrome.sockets.tcp}");
     chrome.SocketProperties properties = new chrome.SocketProperties();
     chrome.sockets.tcp.create(properties).then((chrome.CreateInfo info) {
-     // print("### connect 002 ${info}");
       return chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort).then((int e) {
-       // print("### connect 003 ${e}");
-        {
           chrome.sockets.tcp.setPaused(info.socketId, false);
           clientSocketId = info.socketId;
           HetiChromeSocketManager.getInstance().addClient(info.socketId, this);
           completer.complete(this);
-        }
       });
-    }).catchError((e) {
-      print(e.toString());
-      completer.complete(null);
-    });
+    }).catchError(completer.completeError);
     return completer.future;
   }
 
@@ -73,5 +64,5 @@ class HetiSocketChrome extends HetiSocket {
     HetiChromeSocketManager.getInstance().removeClient(clientSocketId);
     _isClose = true;
   }
-  bool _isClose = false;
+
 }

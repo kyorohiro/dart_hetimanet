@@ -1,25 +1,6 @@
 part of hetimanet.chrome;
 
 class HetiServerSocketChrome extends HetiServerSocket {
-
-  static async.Future<HetiServerSocket> startServer(String address, int port) {
-    async.Completer<HetiServerSocket> completer = new async.Completer();
-    new async.Future.sync(() {
-      chrome.SocketProperties properties = new chrome.SocketProperties();
-      return chrome.sockets.tcpServer.create(properties).then((chrome.CreateInfo info) {
-        HetiChromeSocketManager.getInstance();
-        return chrome.sockets.tcpServer.listen(info.socketId, address, port).then((int backlog) {
-          HetiServerSocketChrome server = new HetiServerSocketChrome._internal(info);
-          HetiChromeSocketManager.getInstance().addServer(info, server);
-          completer.complete(server);
-       });
-      });
-    }).catchError((e) {
-      completer.complete(null);
-    });
-    return completer.future;
-  }
-
   async.StreamController<HetiSocket> _controller = new async.StreamController();
   chrome.CreateInfo _mInfo = null;
 
@@ -27,9 +8,7 @@ class HetiServerSocketChrome extends HetiServerSocket {
     _mInfo = info;
   }
 
-  async.Stream<HetiSocket> onAccept() {
-    return _controller.stream;
-  }
+  async.Stream<HetiSocket> onAccept() => _controller.stream;
 
   void onAcceptInternal(chrome.AcceptInfo info) {
     _controller.add(new HetiSocketChrome(info.clientSocketId));
@@ -40,5 +19,17 @@ class HetiServerSocketChrome extends HetiServerSocket {
     HetiChromeSocketManager.getInstance().removeServer(_mInfo);
   }
 
-}
+  static async.Future<HetiServerSocket> startServer(String address, int port) {
+    async.Completer<HetiServerSocket> completer = new async.Completer();
 
+    chrome.sockets.tcpServer.create(new chrome.SocketProperties()).then((chrome.CreateInfo info) {
+      HetiChromeSocketManager.getInstance();
+      return chrome.sockets.tcpServer.listen(info.socketId, address, port).then((int backlog) {
+        HetiServerSocketChrome server = new HetiServerSocketChrome._internal(info);
+        HetiChromeSocketManager.getInstance().addServer(info, server);
+        completer.complete(server);
+      });
+    }).catchError(completer.completeError);
+    return completer.future;
+  }
+}

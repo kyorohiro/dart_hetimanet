@@ -10,31 +10,6 @@ import 'hetihttpresponse.dart';
 import 'hetihttpserver.dart';
 import 'dart:typed_data' as typed_data;
 
-class HetiHttpServerPlusResponseItem {
-  HetiHttpServerRequest req;
-  
-  HetiHttpServerPlusResponseItem(HetiHttpServerRequest req) {
-    this.req = req;
-  }
-
-  HetiSocket get socket => req.socket;
-  String get targetLine => req.info.line.requestTarget;
-  String get path {
-    int index = path.indexOf("?");
-    if (index == -1) {
-      index = path.length;
-    }
-    return path.substring(0, index);
-  }
-
-  String get option {
-    int index = path.indexOf("?");
-    if (index == -1) {
-      index = path.length;
-    }
-    return path.substring(index);
-  }
-}
 
 class HetiHttpServerPlus {
   String localIP = "0.0.0.0";
@@ -191,5 +166,31 @@ class HetiHttpServerPlus {
     return completer.future;
   }
 
+}
+
+class HetiHttpServerPlusResponseItem {
+  HetiHttpServerRequest req;
+  
+  HetiHttpServerPlusResponseItem(HetiHttpServerRequest req) {
+    this.req = req;
+  }
+
+  HetiSocket get socket => req.socket;
+  String get targetLine => req.info.line.requestTarget;
+  String get path {
+    int index = path.indexOf("?");
+    if (index == -1) {
+      index = path.length;
+    }
+    return path.substring(0, index);
+  }
+
+  String get option {
+    int index = path.indexOf("?");
+    if (index == -1) {
+      index = path.length;
+    }
+    return path.substring(index);
+  }
 }
 
