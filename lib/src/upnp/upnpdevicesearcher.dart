@@ -38,7 +38,11 @@ class UpnpDeviceSearcher {
     async.Completer<UpnpDeviceSearcher> completer = new async.Completer();
     UpnpDeviceSearcher ret = new UpnpDeviceSearcher._internal(builder);
     ret._init().then((int v) {
-      completer.complete(ret);
+      if (v >= 0) {
+        completer.complete(ret);
+      } else {
+        completer.completeError(new Exception());        
+      }
     }).catchError((e) {
       completer.completeError(e);
     });

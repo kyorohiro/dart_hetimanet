@@ -32,6 +32,10 @@ abstract class HetiSocket {
 }
 
 abstract class HetiUdpSocket {
+  ///
+  /// The result code returned from the underlying network call. A
+  /// negative value indicates an error.
+  ///
   async.Future<int> bind(String address, int port);
   async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port);
   async.Stream<HetiReceiveUdpInfo> onReceive();
