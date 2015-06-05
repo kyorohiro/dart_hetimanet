@@ -1,12 +1,13 @@
 part of hetimanet.upnp;
 
 class UpnpPPPDevice {
-//  static final String KEY_SOAPACTION = "SOAPACTION";
-  static final String KEY_SOAPACTION = "SOAPAction";
-  static final String VALUE_PORT_MAPPING_PROTOCOL_UDP = "UDP";
-  static final String VALUE_PORT_MAPPING_PROTOCOL_TCP = "TCP";
-  static final int VALUE_ENABLE = 1;
-  static final int VALUE_DISABLE = 0;
+  static const String KEY_SOAPACTION = "SOAPAction";
+  static const String VALUE_PORT_MAPPING_PROTOCOL_UDP = "UDP";
+  static const String VALUE_PORT_MAPPING_PROTOCOL_TCP = "TCP";
+  static const int MODE_M_POST = 0;
+  static const int MODE_POST = 1;
+  static const int VALUE_ENABLE = 1;
+  static const int VALUE_DISABLE = 0;
 
   UpnpDeviceInfo _base = null;
   String _serviceName = "WANPPPConnection";
@@ -68,17 +69,16 @@ class UpnpPPPDevice {
     String requestBody = """<?xml version="1.0"?>\r\n<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><m:AddPortMapping xmlns:m="urn:schemas-upnp-org:service:${_serviceName}:${_version}">""" + """<NewRemoteHost></NewRemoteHost><NewExternalPort>${newExternalPort}</NewExternalPort><NewProtocol>${newProtocol}</NewProtocol><NewInternalPort>${newInternalPort}</NewInternalPort><NewInternalClient>${newInternalClient}</NewInternalClient><NewEnabled>${newEnabled}</NewEnabled><NewPortMappingDescription>${newPortMappingDescription}</NewPortMappingDescription><NewLeaseDuration>${newLeaseDuration}</NewLeaseDuration></m:AddPortMapping></SOAP-ENV:Body></SOAP-ENV:Envelope>\r\n""";
 
     request(serviceInfo, headerValue, requestBody, mode).then((UpnpPPPDeviceRequestResponse response) {
-      if (response.resultCode == 200) {
         completer.complete(new UpnpAddPortMappingResponse(response.resultCode));
-      } else {
-        completer.complete(new UpnpAddPortMappingResponse(response.resultCode * -1));
-      }
     }).catchError((e) {
       completer.completeError(e);
     });
     return completer.future;
   }
 
+  /**
+   * return resultCode. if success then. return 200. ;
+   */
   async.Future<UpnpDeletePortMappingResponse> requestDeletePortMapping(int newExternalPort, String newProtocol, [int mode = MODE_POST, UpnpDeviceServiceInfo serviceInfo = null]) {
     async.Completer<UpnpDeletePortMappingResponse> completer = new async.Completer();
     if (getPPPService().length == 0) {
@@ -91,17 +91,12 @@ class UpnpPPPDevice {
     String requestBody = """<?xml version=\"1.0\"?>\r\n<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" SOAP-ENV:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><SOAP-ENV:Body><m:DeletePortMapping xmlns:m=\"urn:schemas-upnp-org:service:${_serviceName}:${_version}\">""" + """<NewRemoteHost></NewRemoteHost><NewExternalPort>${newExternalPort}</NewExternalPort><NewProtocol>${newProtocol}</NewProtocol></m:DeletePortMapping></SOAP-ENV:Body></SOAP-ENV:Envelope>\r\n""";
     String headerValue = """\"urn:schemas-upnp-org:service:${_serviceName}:${_version}#DeletePortMapping\"""";
     request(serviceInfo, headerValue, requestBody, mode).then((UpnpPPPDeviceRequestResponse response) {
-      if (response.resultCode == 200) {
         completer.complete(new UpnpDeletePortMappingResponse(response.resultCode));
-      } else {
-        completer.complete(new UpnpDeletePortMappingResponse(response.resultCode * -1));
-      }
     }).catchError((e) {
       completer.completeError(e);
     });
     return completer.future;
   }
-
 
   async.Future<UpnpGetExternalIPAddressResponse> requestGetExternalIPAddress([int mode = MODE_POST, UpnpDeviceServiceInfo serviceInfo = null]) {
     async.Completer<UpnpGetExternalIPAddressResponse> completer = new async.Completer();
@@ -122,7 +117,7 @@ class UpnpPPPDevice {
         UpnpGetExternalIPAddressResponse r = new UpnpGetExternalIPAddressResponse(response.resultCode, elements.first.text);
         completer.complete(r);
       } else {
-        UpnpGetExternalIPAddressResponse r = new UpnpGetExternalIPAddressResponse(-1 * response.resultCode, "");
+        UpnpGetExternalIPAddressResponse r = new UpnpGetExternalIPAddressResponse(response.resultCode, "");
         completer.complete(r);
       }
     }).catchError((e) {
@@ -141,12 +136,8 @@ class UpnpPPPDevice {
     return deviceInfo;
   }
 
-  static const int MODE_M_POST = 0;
-  static const int MODE_POST = 1;
-
   async.Future<UpnpPPPDeviceRequestResponse> request(UpnpDeviceServiceInfo info, String soapAction, String body, int mode) {
     async.Completer<UpnpPPPDeviceRequestResponse> completer = new async.Completer();
-    HetiSocket socket = _base.getSocketBuilder().createClient();
     String location = _base.getValue(UpnpDeviceInfo.KEY_LOCATION, "");
     if ("" == location) {
       completer.completeError({});
