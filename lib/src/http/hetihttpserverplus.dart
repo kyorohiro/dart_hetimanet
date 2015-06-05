@@ -72,22 +72,24 @@ class HetiHttpServerPlus {
   }
 
 
-  void response(HetiHttpServerRequest req, HetimaFile file, {String contentType:"application/octet-stream"}) {
-    HetiHttpResponseHeaderField header = req.info.find(RfcTable.HEADER_FIELD_RANGE);
-    if (header != null) {
-      typed_data.Uint8List buff = new typed_data.Uint8List.fromList(convert.UTF8.encode(header.fieldValue));
+  void response(HetiHttpServerRequest req, HetimaFile file, {String contentType:"application/octet-stream", Map<String,String> headerList:null, int statusCode:null}) {
+    if(headerList == null) {headerList = {};}
+    headerList["Content-Type"] = contentType;
+    HetiHttpResponseHeaderField fieldRangeHeader = req.info.find(RfcTable.HEADER_FIELD_RANGE);
+    if (fieldRangeHeader != null && statusCode == null) {
+      typed_data.Uint8List buff = new typed_data.Uint8List.fromList(convert.UTF8.encode(fieldRangeHeader.fieldValue));
       ArrayBuilder builder = new ArrayBuilder.fromList(buff);
       builder.fin();
       HetiHttpResponse.decodeRequestRangeValue(new EasyParser(builder)).then((HetiHttpRequestRange range) {
-        _startResponseRangeFile(req.socket, file, contentType, range.start, range.end);
+        _startResponseRangeFile(req.socket, file, headerList, range.start, range.end);
       });
     } else {
-      _startResponseFile(req.socket, file);
+      _startResponseFile(req.socket, statusCode, headerList, file);
     }
   }
 
 
-  void _startResponseRangeFile(HetiSocket socket, HetimaFile file, String contentType, int start, int end) {
+  void _startResponseRangeFile(HetiSocket socket, HetimaFile file, Map<String,String> header, int start, int end) {
     ArrayBuilder response = new ArrayBuilder();
     file.getLength().then((int length) {
       if (end == -1 || end > length - 1) {
@@ -97,8 +99,10 @@ class HetiHttpServerPlus {
       response.appendString("HTTP/1.1 206 Partial Content\r\n");
       response.appendString("Connection: close\r\n");
       response.appendString("Content-Length: ${contentLength}\r\n");
-      response.appendString("Content-Type: ${contentType}\r\n");
       response.appendString("Content-Range: bytes ${start}-${end}/${length}\r\n");
+      for(String key in header.keys) {
+        response.appendString("${key}: ${header[key]}\r\n");
+      }
       response.appendString("\r\n");
       print(response.toText());
       socket.send(response.toList()).then((HetiSendInfo i) {
@@ -109,12 +113,18 @@ class HetiHttpServerPlus {
     });
   }
 
-  void _startResponseFile(HetiSocket socket, HetimaFile file) {
+  void _startResponseFile(HetiSocket socket, int statuCode, Map<String,String> header, HetimaFile file) {
     ArrayBuilder response = new ArrayBuilder();
+    if(statuCode == null) {
+      statuCode = 200;
+    }
     file.getLength().then((int length) {
-      response.appendString("HTTP/1.1 200 OK\r\n");
+      response.appendString("HTTP/1.1 ${statuCode} OK\r\n");
       response.appendString("Connection: close\r\n");
       response.appendString("Content-Length: ${length}\r\n");
+      for(String key in header.keys) {
+        response.appendString("${key}: ${header[key]}\r\n");
+      }
       response.appendString("\r\n");
       socket.send(response.toList()).then((HetiSendInfo i) {
         _startResponseBuffer(socket, file, 0, length);
@@ -182,19 +192,19 @@ class HetiHttpServerPlusResponseItem {
   HetiSocket get socket => req.socket;
   String get targetLine => req.info.line.requestTarget;
   String get path {
-    int index = path.indexOf("?");
+    int index = targetLine.indexOf("?");
     if (index == -1) {
-      index = path.length;
+      index = targetLine.length;
     }
-    return path.substring(0, index);
+    return targetLine.substring(0, index);
   }
 
   String get option {
-    int index = path.indexOf("?");
+    int index = targetLine.indexOf("?");
     if (index == -1) {
-      index = path.length;
+      index = targetLine.length;
     }
-    return path.substring(index);
+    return targetLine.substring(index);
   }
 }
 
