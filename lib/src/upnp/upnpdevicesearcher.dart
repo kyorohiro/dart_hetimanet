@@ -1,22 +1,22 @@
 part of hetimanet.upnp;
 
 class UpnpDeviceSearcher {
-  static String SSDP_ADDRESS = "239.255.255.250";
-  static int SSDP_PORT = 1900;
-  static String SSDP_M_SEARCH = """M-SEARCH * HTTP/1.1\r\n""" + """MX: 3\r\n""" + """HOST: 239.255.255.250:1900\r\n""" + """MAN: "ssdp:discover"\r\n""" + """ST: upnp:rootdevice\r\n""" + """\r\n""";
-  static String SSDP_M_SEARCH_WANPPPConnectionV1 = """M-SEARCH * HTTP/1.1\r\n""" +
+  static const String SSDP_ADDRESS = "239.255.255.250";
+  static const int SSDP_PORT = 1900;
+  static const String SSDP_M_SEARCH = """M-SEARCH * HTTP/1.1\r\n""" + """MX: 3\r\n""" + """HOST: 239.255.255.250:1900\r\n""" + """MAN: "ssdp:discover"\r\n""" + """ST: upnp:rootdevice\r\n""" + """\r\n""";
+  static const String SSDP_M_SEARCH_WANPPPConnectionV1 = """M-SEARCH * HTTP/1.1\r\n""" +
       """MX: 3\r\n""" +
       """HOST: 239.255.255.250:1900\r\n""" +
       """MAN: "ssdp:discover"\r\n""" +
       """ST: urn:schemas-upnp-org:service:WANPPPConnection:1\r\n""" +
       """\r\n""";
-  static String SSDP_M_SEARCH_WANIPConnectionV1 = """M-SEARCH * HTTP/1.1\r\n""" +
+  static const String SSDP_M_SEARCH_WANIPConnectionV1 = """M-SEARCH * HTTP/1.1\r\n""" +
       """MX: 3\r\n""" +
       """HOST: 239.255.255.250:1900\r\n""" +
       """MAN: "ssdp:discover"\r\n""" +
       """ST: urn:schemas-upnp-org:service:WANIPConnection:1\r\n""" +
       """\r\n""";
-  static String SSDP_M_SEARCH_WANIPConnectionV2 = """M-SEARCH * HTTP/1.1\r\n""" +
+  static const String SSDP_M_SEARCH_WANIPConnectionV2 = """M-SEARCH * HTTP/1.1\r\n""" +
       """MX: 3\r\n""" +
       """HOST: 239.255.255.250:1900\r\n""" +
       """MAN: "ssdp:discover"\r\n""" +
@@ -27,21 +27,22 @@ class UpnpDeviceSearcher {
   HetiUdpSocket _socket = null;
   async.StreamController<UpnpDeviceInfo> _streamer = new async.StreamController.broadcast();
   HetiSocketBuilder _socketBuilder = null;
+  bool _nowSearching = false;
 
-  UpnpDeviceSearcher._internal(HetiSocketBuilder builder) {
+  UpnpDeviceSearcher._fromSocketBuilder(HetiSocketBuilder builder) {
     _socketBuilder = builder;
   }
 
-  async.Future<int> _init() {
+  async.Future<int> _initialize() {
     _socket = _socketBuilder.createUdpClient();
     _socket.onReceive().listen((HetiReceiveUdpInfo info) {
-      print("########");
-      print("" + convert.UTF8.decode(info.data));
-      print("########");
+//      print("" + convert.UTF8.decode(info.data));
       extractDeviceInfoFromUdpResponse(info.data);
     });
     return _socket.bind("0.0.0.0", 0);
   }
+
+  bool get nowSearching => _nowSearching;
 
   async.Future<int> close() {
     return _socket.close();
@@ -52,15 +53,15 @@ class UpnpDeviceSearcher {
    */
   static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder) {
     async.Completer<UpnpDeviceSearcher> completer = new async.Completer();
-    UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._internal(builder);
-    returnValue._init().then((int v) {
+    UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder);
+    returnValue._initialize().then((int v) {
       if (v >= 0) {
         completer.complete(returnValue);
       } else {
-        completer.completeError(new Exception());
+        completer.completeError(new UpnpDeviceSearcherException("unexpected(${v})", UpnpDeviceSearcherException.UNEXPECTED));
       }
     }).catchError((e) {
-      completer.completeError(e);
+      completer.completeError(new UpnpDeviceSearcherException("unexpected(${e})", UpnpDeviceSearcherException.UNEXPECTED));
     });
     return completer.future;
   }
@@ -68,9 +69,6 @@ class UpnpDeviceSearcher {
   async.Stream<UpnpDeviceInfo> onReceive() {
     return _streamer.stream;
   }
-
-  bool _nowSearching = false;
-  bool get nowSearching => _nowSearching;
 
   async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 3]) {
     async.Completer completer = new async.Completer();
