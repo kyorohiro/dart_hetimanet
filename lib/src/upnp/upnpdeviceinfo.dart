@@ -1,6 +1,6 @@
 part of hetimanet.upnp;
 
-class UPnpDeviceInfo {
+class UpnpDeviceInfo {
   static final String KEY_ST = "ST";
   static final String KEY_USN = "USN";
   static final String KEY_LOCATION = "Location";
@@ -11,10 +11,10 @@ class UPnpDeviceInfo {
   static final String KEY_EXT = "Ext";
 
   Map<String, String> _headerMap = {};
-  List<UPnpDeviceServiceInfo> _serviceList = [];
+  List<UpnpDeviceServiceInfo> _serviceList = [];
   HetiSocketBuilder socketBuilder;
 
-  UPnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetiSocketBuilder builder) {
+  UpnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetiSocketBuilder builder) {
     socketBuilder = builder;
     for (HetiHttpResponseHeaderField header in headerField) {
       if (header.fieldName != null) {
@@ -36,7 +36,7 @@ class UPnpDeviceInfo {
        buffer.write("__"+key+":"+_headerMap[key]+";\r\n");
      }
      buffer.write("#service;\r\n");
-     for(UPnpDeviceServiceInfo service in _serviceList) {
+     for(UpnpDeviceServiceInfo service in _serviceList) {
        buffer.write("__"+service.serviceId+";\r\n");       
      }
      return buffer.toString();
@@ -63,10 +63,10 @@ class UPnpDeviceInfo {
   }
 
   bool operator ==(Object other) {
-    if (!(other is UPnpDeviceInfo)) {
+    if (!(other is UpnpDeviceInfo)) {
       return false;
     }
-    UPnpDeviceInfo otherAs = other as UPnpDeviceInfo;
+    UpnpDeviceInfo otherAs = other as UpnpDeviceInfo;
     if (this._headerMap.keys.length != otherAs._headerMap.keys.length) {
       return false;
     }
@@ -82,7 +82,7 @@ class UPnpDeviceInfo {
   }
 
 
-  List<UPnpDeviceServiceInfo> get serviceList => _serviceList;
+  List<UpnpDeviceServiceInfo> get serviceList => _serviceList;
   String URLBase = "";
 
   void _updateServiceXml() {
@@ -91,7 +91,7 @@ class UPnpDeviceInfo {
     URLBase = _extractFirstValue(document.root, "URLBase", "");
     Iterable<xml.XmlElement> elements = document.findAllElements("service");
     for (xml.XmlElement element in elements) {
-      UPnpDeviceServiceInfo info = new UPnpDeviceServiceInfo();
+      UpnpDeviceServiceInfo info = new UpnpDeviceServiceInfo();
       info.controlURL = _extractFirstValue(element, "controlURL", "");
       info.eventSubURL = _extractFirstValue(element, "eventSubURL", "");
       info.SCPDURL = _extractFirstValue(element, "SCPDURL", "");
@@ -125,7 +125,7 @@ class UPnpDeviceInfo {
 
   async.Future<String> requestServiceList() {
     async.Completer<String> completer = new async.Completer();
-    String location = getValue(UPnpDeviceInfo.KEY_LOCATION, "");
+    String location = getValue(UpnpDeviceInfo.KEY_LOCATION, "");
     if (location == "" || location == null) {
       completer.completeError({});
       return completer.future;
@@ -153,7 +153,7 @@ class UPnpDeviceInfo {
 }
 
 
-class UPnpDeviceServiceInfo 
+class UpnpDeviceServiceInfo 
 {
   String serviceType = "";
   String serviceId = "";

@@ -23,9 +23,9 @@ class UpnpDeviceSearcher {
       """ST: urn:schemas-upnp-org:service:WANIPConnection:2\r\n""" +
       """\r\n""";
 
-  List<UPnpDeviceInfo> deviceInfoList = new List();
+  List<UpnpDeviceInfo> deviceInfoList = new List();
   HetiUdpSocket _socket = null;
-  async.StreamController<UPnpDeviceInfo> _streamer = new async.StreamController.broadcast();
+  async.StreamController<UpnpDeviceInfo> _streamer = new async.StreamController.broadcast();
   HetiSocketBuilder _socketBuilder = null;
 
   UpnpDeviceSearcher._internal(HetiSocketBuilder builder) {
@@ -47,6 +47,9 @@ class UpnpDeviceSearcher {
     return _socket.close();
   }
 
+  /**
+   * create UPnPDeviceSearcher Object.
+   */
   static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder) {
     async.Completer<UpnpDeviceSearcher> completer = new async.Completer();
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._internal(builder);
@@ -62,7 +65,7 @@ class UpnpDeviceSearcher {
     return completer.future;
   }
 
-  async.Stream<UPnpDeviceInfo> onReceive() {
+  async.Stream<UpnpDeviceInfo> onReceive() {
     return _streamer.stream;
   }
 
@@ -102,7 +105,7 @@ class UpnpDeviceSearcher {
     EasyParser parser = new EasyParser(builder);
     builder.appendIntList(buffer, 0, buffer.length);
     HetiHttpResponse.decodeHttpMessage(parser).then((HetiHttpMessageWithoutBody message) {
-      UPnpDeviceInfo info = new UPnpDeviceInfo(message.headerField, _socketBuilder);
+      UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
       if (!deviceInfoList.contains(info)) {
         deviceInfoList.add(info);
         info.extractService().then((int v) {
