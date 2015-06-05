@@ -10,16 +10,17 @@ import 'dart:async' as async;
 
 void main() {
   HetiSocketBuilder builder = new HetiSocketBuilderChrome();
-  HetiHttpServerPlus server = new HetiHttpServerPlus(builder);
+  HetiHttpServerHelper server = new HetiHttpServerHelper(builder);
   server.basePort = 8080;
   server.numOfRetry = 0;
 
   server.startServer().then((HetiHttpStartServerResult result) {
-    ;
+    print("passed start");
+  }).catchError((e) {
+    print("failed start");
   });
 
   server.onResponse.listen((HetiHttpServerPlusResponseItem item) {
-    print("==A");
     print("==${item.path}==${item.option}");
     if(item.path.compareTo("/test/index.htm")==0) {
       ArrayBuilder builder = new ArrayBuilder.fromList(convert.UTF8.encode("redirect"), true);

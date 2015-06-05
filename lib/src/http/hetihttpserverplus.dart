@@ -14,7 +14,7 @@ class HetiHttpStartServerResult {
   
 }
 
-class HetiHttpServerPlus {
+class HetiHttpServerHelper {
   String localIP = "0.0.0.0";
   int basePort = 18085;
   int _localPort = 18085;
@@ -29,7 +29,7 @@ class HetiHttpServerPlus {
   async.StreamController<HetiHttpServerPlusResponseItem> _onResponse = new async.StreamController();
   async.Stream<HetiHttpServerPlusResponseItem> get onResponse => _onResponse.stream;
 
-  HetiHttpServerPlus(HetiSocketBuilder socketBuilder) {
+  HetiHttpServerHelper(HetiSocketBuilder socketBuilder) {
     _socketBuilder = socketBuilder;
   }
 

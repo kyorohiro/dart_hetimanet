@@ -13,7 +13,7 @@ https://github.com/kyorohiro/HetimaDelphinium
 https://github.com/kyorohiro/HetimaPortMap
 
 ### Http Server
-[Retirect Server Sample](example/redirectserver)
+* [Retirect Server Sample](example/redirectserver)
 
 ### UPnP Portmap
 #### create Searcher
