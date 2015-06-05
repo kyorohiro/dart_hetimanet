@@ -5,6 +5,8 @@ dependencies:
   chrome: any
   hetimacore:
     git: https://github.com/kyorohiro/dart_hetimacore
+  hetimafile:
+    git: https://github.com/kyorohiro/dart_hetimafile.git
   hetimaregex:
     git: https://github.com/kyorohiro/dart_hetimaregex
   xml: any

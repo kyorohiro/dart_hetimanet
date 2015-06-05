@@ -23,7 +23,7 @@ void main() {
   hetima_cl.HetiSocketBuilderChrome builder = new hetima_cl.HetiSocketBuilderChrome();
   hetima.HetiHttpClient client = new hetima.HetiHttpClient(builder);
   //  client.connect("www.yahoo.co.jp", 80).then((int v){//"157.7.205.138"
-  client.connect("www.google.com", 80).then((int v) {//"157.7.205.138"
+  client.connect("www.google.com", 80).then((hetima.HetiHttpClientConnectResult v) {//"157.7.205.138"
     //  client.connect("157.7.205.138", 80).then((int v){//
     Map<String, String> t = {};
     t["Connection"] = "keep-alive";

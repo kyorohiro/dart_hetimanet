@@ -133,7 +133,7 @@ class UpnpDeviceInfo {
 
     HetiHttpClient client = new HetiHttpClient(socketBuilder);
     HttpUrl url = HttpUrlDecoder.decodeUrl(location);
-    client.connect(url.host, url.port).then((int d) {
+    client.connect(url.host, url.port).then((HetiHttpClientConnectResult d) {
       return client.get(url.path);
     }).then((HetiHttpClientResponse res) {
       HetiHttpResponseHeaderField field = res.message.find(RfcTable.HEADER_FIELD_CONTENT_LENGTH);

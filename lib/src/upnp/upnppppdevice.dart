@@ -158,7 +158,7 @@ class UpnpPPPDevice {
     if (info.controlURL != null && info.controlURL.length != 0) {
       path = info.controlURL;
     }
-    client.connect(host, port).then((int v) {
+    client.connect(host, port).then((HetiHttpClientConnectResult v) {
       if (mode == MODE_POST) {
         return client.post(path, convert.UTF8.encode(body), {
           KEY_SOAPACTION: soapAction,

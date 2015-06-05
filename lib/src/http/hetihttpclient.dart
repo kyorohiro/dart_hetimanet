@@ -22,6 +22,9 @@ class HetiHttpClientResponse {
   }
 }
 
+class HetiHttpClientConnectResult {
+  
+}
 class HetiHttpClient {
   HetiSocketBuilder _builder;
   HetiSocket socket = null;
@@ -32,10 +35,10 @@ class HetiHttpClient {
     _builder = builder;
   }
 
-  async.Future<int> connect(String _host, int _port) {
+  async.Future<HetiHttpClientConnectResult> connect(String _host, int _port) {
     host = _host;
     port = _port;
-    async.Completer<int> completer = new async.Completer();
+    async.Completer<HetiHttpClientConnectResult> completer = new async.Completer();
     socket = _builder.createClient();
     if (socket == null) {
       completer.completeError(new Exception(""));
@@ -46,7 +49,7 @@ class HetiHttpClient {
       if (socket == null) {
         completer.completeError(new Exception(""));
       } else {
-        completer.complete(1);
+        completer.complete(new HetiHttpClientConnectResult());
       }
     }).catchError((e) {
       completer.completeError(e);
