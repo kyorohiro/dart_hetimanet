@@ -1,19 +1,87 @@
 # dart_hetimanet
 
-A library for Dart developers. It is awesome.
+A library for Dart developers. 
+* HttpServer
+* HttpClient
+* UPnP PortMap
 
-## Usage
+## UPnP Portmap
+#### create Searcher
+```
+  hetima.UpnpDeviceSearcher.createInstance(new HetiSocketBuilderChrome()).then((UpnpDeviceSearcher deviceSearcher) {
+    print("### ok setupUpnp ${searcher}");
+  }).catchError((e) {
+    print("### error");
+  });
+```
 
-A simple usage example:
+#### search Router
+```
+  deviceSearcher.searchWanPPPDevice().then((int v) {
+    if (deviceSearcher.deviceInfoList == null || deviceSearcher.deviceInfoList.length <= 0) {
+      print("not found router");
+    }
+    for (hetima.UpnpDeviceInfo info in deviceSearcher.deviceInfoList) {
+      print(info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*"));
+    }
+  }).catchError((e) {
+    print("error");
+  });
+```
 
-    import 'package:dart_hetimanet/dart_hetimanet.dart';
+#### request global ip
+```
+  UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+  pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse ip) {
+    print("${ip.externalIp}");
+  }).catchError((e) {
+    print("error");
+  });
+```
 
-    main() {
-      var awesome = new Awesome();
+#### request generic port mapping
+```
+  pppDevice.requestGetGenericPortMapping(newPortmappingIndex, mode).then((UpnpGetGenericPortMappingResponse r) {
+    if (r.resultCode != 200) {
+      print("failed");
+      return;
     }
 
-## Features and bugs
+    print("publicPort = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "")}");
+    print("localIp = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewInternalClient, "")}");
+    print("localPort = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewInternalPort, "")}");
+    print("protocol = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewProtocol, "")}");
+    print("portMapInfo.description = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewPortMappingDescription, "")}");
 
-Please file feature requests and bugs at the [issue tracker][tracker].
+  }).catchError((e) {
+    print("error");
+  });
+```
 
-[tracker]: http://example.com/issues/replaceme
+#### request add port mapping
+```
+  pppDevice.requestAddPortMapping(publicPort, "tcp", localPort, localIp, 1, "test", 0)
+  .then((hetima.UpnpAddPortMappingResponse resp) {
+    if (resp.resultCode == 200) {
+      print("ok");
+    } else {
+      print("failed");
+    }
+  }).catchError((e) {
+      print("error");
+  });
+```
+
+#### request remove port mapping
+```
+  pppDevice.requestDeletePortMapping(publicPort, "tcp")
+  .then((hetima.UpnpDeletePortMappingResponse resp) {
+    if (resp.resultCode == 200) {
+      print("ok");
+    } else {
+      print("failed");
+    }
+  }).catchError((e) {
+      print("error");
+  });
+```
