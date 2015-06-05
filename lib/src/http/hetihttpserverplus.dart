@@ -10,11 +10,15 @@ import 'hetihttpresponse.dart';
 import 'hetihttpserver.dart';
 import 'dart:typed_data' as typed_data;
 
+class HetiHttpStartServerResult {
+  
+}
 
 class HetiHttpServerPlus {
   String localIP = "0.0.0.0";
   int basePort = 18085;
   int _localPort = 18085;
+  int numOfRetry = 100;
   int get localPort => _localPort;
 
   HetiHttpServer _server = null;
@@ -37,10 +41,10 @@ class HetiHttpServerPlus {
     _server = null;
   }
 
-  async.Future<int> startServer() {
+  async.Future<HetiHttpStartServerResult> startServer() {
     print("startServer");
     _localPort = basePort;
-    async.Completer<int> completer = new async.Completer();
+    async.Completer<HetiHttpStartServerResult> completer = new async.Completer();
     if (_server != null) {
       completer.completeError({});
       return completer.future;
@@ -49,7 +53,7 @@ class HetiHttpServerPlus {
     _retryBind().then((HetiHttpServer server) {
       _controllerUpdateLocalServer.add("${_localPort}");
       _server = server;
-      completer.complete(0);
+      completer.complete(new HetiHttpStartServerResult());
       server.onNewRequest().listen(_hundleRequest);
     }).catchError((e) {
       completer.completeError(e);
@@ -68,7 +72,7 @@ class HetiHttpServerPlus {
   }
 
 
-  void response(HetiHttpServerRequest req, HetimaFile file, [String contentType="application/octet-stream"]) {
+  void response(HetiHttpServerRequest req, HetimaFile file, {String contentType:"application/octet-stream"}) {
     HetiHttpResponseHeaderField header = req.info.find(RfcTable.HEADER_FIELD_RANGE);
     if (header != null) {
       typed_data.Uint8List buff = new typed_data.Uint8List.fromList(convert.UTF8.encode(header.fieldValue));
@@ -149,7 +153,7 @@ class HetiHttpServerPlus {
 
   async.Future<HetiHttpServer> _retryBind() {
     async.Completer<HetiHttpServer> completer = new async.Completer();
-    int portMax = _localPort + 100;
+    int portMax = _localPort + numOfRetry;
     bindFunc() {
       HetiHttpServer.bind(_socketBuilder, localIP, _localPort).then((HetiHttpServer server) {
         completer.complete(server);
