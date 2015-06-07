@@ -4,11 +4,11 @@ description: A starting point for Dart libraries or applications.
 dependencies:
   chrome: any
   hetimacore:
-    path: /Users/kiyohiro/dart/git/dart_hetimacore
+    git: https://github.com/kyorohiro/dart_hetimacore.git
   hetimafile:
     git: https://github.com/kyorohiro/dart_hetimafile.git
   hetimaregex:
-    git: https://github.com/kyorohiro/dart_hetimaregex
+    git: https://github.com/kyorohiro/dart_hetimaregex.git
   xml: any
 dev_dependencies:
   unittest: '>=0.11.0 <0.12.0'
