@@ -72,7 +72,7 @@ class HetiHttpServerHelper {
   }
 
 
-  void response(HetiHttpServerRequest req, HetimaFile file, {String contentType:"application/octet-stream", Map<String,String> headerList:null, int statusCode:null}) {
+  void response(HetiHttpServerRequest req, HetimaData file, {String contentType:"application/octet-stream", Map<String,String> headerList:null, int statusCode:null}) {
     if(headerList == null) {headerList = {};}
     headerList["Content-Type"] = contentType;
     HetiHttpResponseHeaderField fieldRangeHeader = req.info.find(RfcTable.HEADER_FIELD_RANGE);
@@ -89,7 +89,7 @@ class HetiHttpServerHelper {
   }
 
 
-  void _startResponseRangeFile(HetiSocket socket, HetimaFile file, Map<String,String> header, int start, int end) {
+  void _startResponseRangeFile(HetiSocket socket, HetimaData file, Map<String,String> header, int start, int end) {
     ArrayBuilder response = new ArrayBuilder();
     file.getLength().then((int length) {
       if (end == -1 || end > length - 1) {
@@ -113,7 +113,7 @@ class HetiHttpServerHelper {
     });
   }
 
-  void _startResponseFile(HetiSocket socket, int statuCode, Map<String,String> header, HetimaFile file) {
+  void _startResponseFile(HetiSocket socket, int statuCode, Map<String,String> header, HetimaData file) {
     ArrayBuilder response = new ArrayBuilder();
     if(statuCode == null) {
       statuCode = 200;
@@ -134,7 +134,7 @@ class HetiHttpServerHelper {
     });
   }
 
-  void _startResponseBuffer(HetiSocket socket, HetimaFile file, int index, int length) {
+  void _startResponseBuffer(HetiSocket socket, HetimaData file, int index, int length) {
     int start = index;
     responseTask() {
       int end = start + 256 * 1024;

@@ -10,7 +10,7 @@ import 'chunkedbuilderadapter.dart';
 
 class HetiHttpClientResponse {
   HetiHttpMessageWithoutBody message;
-  HetimaBuilder body;
+  HetimaReader body;
   int getContentLength() {
     HetiHttpResponseHeaderField contentLength = message.find(RfcTable.HEADER_FIELD_CONTENT_LENGTH);
     if (contentLength != null) {
@@ -26,20 +26,21 @@ class HetiHttpClientConnectResult {
   
 }
 class HetiHttpClient {
-  HetiSocketBuilder _builder;
+  HetiSocketBuilder _socketBuilder;
   HetiSocket socket = null;
   String host;
   int port;
 
-  HetiHttpClient(HetiSocketBuilder builder) {
-    _builder = builder;
+  //, [HetimaDataBuilder b]
+  HetiHttpClient(HetiSocketBuilder socketBuilder, [HetimaDataBuilder dataBuilder]) {
+    _socketBuilder = socketBuilder;
   }
 
   async.Future<HetiHttpClientConnectResult> connect(String _host, int _port) {
     host = _host;
     port = _port;
     async.Completer<HetiHttpClientConnectResult> completer = new async.Completer();
-    socket = _builder.createClient();
+    socket = _socketBuilder.createClient();
     if (socket == null) {
       completer.completeError(new Exception(""));
       return completer.future;
@@ -177,7 +178,7 @@ class HetiHttpClient {
       //
       HetiHttpResponseHeaderField transferEncodingField = message.find("Transfer-Encoding");
       if (transferEncodingField == null || transferEncodingField.fieldValue != "chunked") {
-        result.body = new HetimaBuilderAdapter(socket.buffer, message.index);
+        result.body = new HetimaReaderAdapter(socket.buffer, message.index);
         if (result.message.contentLength > 0) {
           result.body.getByteFuture(message.index + result.message.contentLength - 1, 1).then((e) {
             result.body.immutable = true;
@@ -186,7 +187,7 @@ class HetiHttpClient {
           result.body.immutable = true;
         }
       } else {
-        result.body = new ChunkedBuilderAdapter(new HetimaBuilderAdapter(socket.buffer, message.index)).start();
+        result.body = new ChunkedBuilderAdapter(new HetimaReaderAdapter(socket.buffer, message.index)).start();
       }
       completer.complete(result);
     }).catchError((e) {

@@ -14,18 +14,18 @@ class HetiHttpClientHelper {
   String _address;
   int _port;
   HetiSocketBuilder _socketBuilder;
-  HetimaFileBuilder _fileBuilder;
+  HetimaDataBuilder _fileBuilder;
   String get address => _address;
   int get port => _port;
 
-  HetiHttpClientHelper(String address, int port, HetiSocketBuilder socketBuilder, HetimaFileBuilder fileBuilder) {
+  HetiHttpClientHelper(String address, int port, HetiSocketBuilder socketBuilder, HetimaDataBuilder fileBuilder) {
     this._address = address;
     this._port = port;
     this._socketBuilder = socketBuilder;
     this._fileBuilder = fileBuilder;
   }
 
-  async.Future<HetimaFile> get(String pathAndOption) {
+  async.Future<HetimaData> get(String pathAndOption) {
     HetiHttpClient client  = new HetiHttpClient(_socketBuilder);
     client.connect(_address, _port).then((HetiHttpClientConnectResult b){
       return client.get(pathAndOption);

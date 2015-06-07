@@ -24,12 +24,12 @@ void main() {
     print("==${item.path}==${item.option}");
     if(item.path.compareTo("/test/index.htm")==0) {
       ArrayBuilder builder = new ArrayBuilder.fromList(convert.UTF8.encode("redirect"), true);
-      HetimaFile file = new HetimaBuilderToFile(builder);
+      HetimaData file = new HetimaBuilderToFile(builder);
       Map<String, String> headerList = {"Location": "http://127.0.0.1:8080/test/index.html"};    
       server.response(item.req, file, headerList: headerList, statusCode:301);
     } else {
       ArrayBuilder builder = new ArrayBuilder.fromList(convert.UTF8.encode("hello"), true);
-      HetimaFile file = new HetimaBuilderToFile(builder);
+      HetimaData file = new HetimaBuilderToFile(builder);
       server.response(item.req, file,contentType:"text/text");    
     }
   });

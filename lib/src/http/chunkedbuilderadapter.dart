@@ -5,12 +5,12 @@ import 'package:hetimacore/hetimacore.dart';
 import 'hetihttpresponse.dart';
 
 
-class ChunkedBuilderAdapter extends HetimaBuilder {
+class ChunkedBuilderAdapter extends HetimaReader {
 
   bool _started = false;
   ArrayBuilder _buffer = new ArrayBuilder();
-  HetimaBuilder _base = null;
-  ChunkedBuilderAdapter(HetimaBuilder builder) {
+  HetimaReader _base = null;
+  ChunkedBuilderAdapter(HetimaReader builder) {
     _base = builder;
     start();
   }

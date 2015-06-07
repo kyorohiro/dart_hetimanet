@@ -39,8 +39,8 @@ void startGet(List<HttpUrl> addrs) {
     HttpUrl addr = addrs.removeLast();
     print("test host:${addr.host} path:${addr.path} port:${addr.port}");
 
-    HetiHttpClientHelper client = new HetiHttpClientHelper(addr.host, addr.port, builder, new HetimaFileFSBuilder());
-    client.get(addr.path).then((HetimaFile f) {
+    HetiHttpClientHelper client = new HetiHttpClientHelper(addr.host, addr.port, builder, new HetimaDataFSBuilder());
+    client.get(addr.path).then((HetimaData f) {
       a();
     }).catchError((e){a();});
   }
