@@ -4,7 +4,7 @@ description: A starting point for Dart libraries or applications.
 dependencies:
   chrome: any
   hetimacore:
-    git: https://github.com/kyorohiro/dart_hetimacore
+    path: /Users/kiyohiro/dart/git/dart_hetimacore
   hetimafile:
     git: https://github.com/kyorohiro/dart_hetimafile.git
   hetimaregex:

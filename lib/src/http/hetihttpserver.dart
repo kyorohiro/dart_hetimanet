@@ -25,6 +25,7 @@ class HetiHttpServer {
       _controllerOnNewRequest = null;
     }
   }
+
   static async.Future<HetiHttpServer> bind(HetiSocketBuilder builder, String address, int port) {
     async.Completer<HetiHttpServer> completer = new async.Completer();
     builder.startServer(address, port).then((HetiServerSocket serverSocket){

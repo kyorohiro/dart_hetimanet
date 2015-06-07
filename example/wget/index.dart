@@ -1,16 +1,16 @@
-import 'package:unittest/unittest.dart' as unit;
 import 'package:hetimacore/hetimacore.dart';
 import 'package:hetimanet/hetimanet.dart';
 import 'package:hetimanet/hetimanet_chrome.dart';
-//import '../lib/hetimanet_chrome.dart' as hetima_cl;
-import 'dart:typed_data' as type;
-import 'dart:convert' as convert;
+import 'package:hetimacore/hetimacore_cl.dart';
 import 'dart:html' as html;
-import 'dart:async' as async;
+
+//
+// HetimaFileBuilder
+//
 
 void main() {
   html.TextAreaElement addr = html.querySelector('#wgetaddr');
-  html.ButtonElement btn = html.querySelector('#editor-now');
+  html.ButtonElement btn = html.querySelector('#wgetbtn');
 
   btn.onClick.listen((html.MouseEvent e) {
     print(addr.value);
@@ -22,7 +22,10 @@ void main() {
 List<HttpUrl> toHttpUrl(List<String> addrs) {
   List<HttpUrl> ret = [];
   for (String addr in addrs) {
-    ret.add(HttpUrlDecoder.decodeUrl(addr));
+    HttpUrl url = HttpUrlDecoder.decodeUrl(addr);
+    if(url != null) {
+     ret.add(HttpUrlDecoder.decodeUrl(addr));
+    }
   }
   return ret;
 }
@@ -34,7 +37,9 @@ void startGet(List<HttpUrl> addrs) {
       return;
     }
     HttpUrl addr = addrs.removeLast();
-    HetiHttpClientHelper client = new HetiHttpClientHelper(addr.host, addr.port, builder);
+    print("test host:${addr.host} path:${addr.path} port:${addr.port}");
+
+    HetiHttpClientHelper client = new HetiHttpClientHelper(addr.host, addr.port, builder, new HetimaFileFSBuilder());
     client.get(addr.path).then((HetimaFile f) {
       a();
     }).catchError((e){a();});

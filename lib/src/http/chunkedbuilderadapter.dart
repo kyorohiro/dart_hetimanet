@@ -1,9 +1,7 @@
 library hetimanet.http.response.chunk;
 
-import 'dart:convert' as convert;
 import 'dart:async' as async;
 import 'package:hetimacore/hetimacore.dart';
-import '../util/hetiutil.dart';
 import 'hetihttpresponse.dart';
 
 

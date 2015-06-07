@@ -73,5 +73,7 @@ class RfcTable {
                                ];
 }
 
-class ParseError implements Exception{
+class ParseError extends Error {
+  ParseError([String mes=""])  {
+  }
 }
