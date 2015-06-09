@@ -27,12 +27,13 @@ class HetiHttpClientConnectResult {
 }
 class HetiHttpClient {
   HetiSocketBuilder _socketBuilder;
+  HetimaDataBuilder _dataBuilder;
   HetiSocket socket = null;
   String host;
   int port;
 
   //, [HetimaDataBuilder b]
-  HetiHttpClient(HetiSocketBuilder socketBuilder, [HetimaDataBuilder dataBuilder]) {
+  HetiHttpClient(HetiSocketBuilder socketBuilder, [HetimaDataBuilder dataBuilder=null]) {
     _socketBuilder = socketBuilder;
   }
 

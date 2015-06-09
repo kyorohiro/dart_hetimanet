@@ -142,7 +142,7 @@ class HetiHttpServerHelper {
         end = (index + length);
       }
       print("####### ${start} ${end}");
-      file.read(start, end).then((ReadResult readResult) {
+      file.read(start, end-start).then((ReadResult readResult) {
         return socket.send(readResult.buffer);
       }).then((HetiSendInfo i) {
         if (end >= (index + length)) {
