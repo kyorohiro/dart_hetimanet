@@ -22,7 +22,7 @@ void main() {
 
   server.onResponse.listen((HetiHttpServerPlusResponseItem item) {
     print("==${item.path}==${item.option}");
-    if(item.path.compareTo("/test/index.htm")==0) {
+    if(item.path.compareTo("/test/index.html")!=0) {
       ArrayBuilder builder = new ArrayBuilder.fromList(convert.UTF8.encode("redirect"), true);
       HetimaData file = new HetimaBuilderToFile(builder);
       Map<String, String> headerList = {"Location": "http://127.0.0.1:8080/test/index.html"};    
