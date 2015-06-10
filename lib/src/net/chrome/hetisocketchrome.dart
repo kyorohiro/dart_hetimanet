@@ -37,7 +37,21 @@ class HetiSocketChrome extends HetiSocket {
     });
     return completer.future;
   }
-
+  async.Future<HetiSocketInfo> getSocketInfo() {
+    async.Completer<HetiSocketInfo> completer = new async.Completer();
+    
+    chrome.sockets.tcp.getInfo(clientSocketId).then((chrome.SocketInfo info) {
+      HetiSocketInfo ret = new HetiSocketInfo()
+      ..localAddress = info.localAddress
+      ..localPort = info.localPort
+      ..peerAddress = info.peerAddress
+      ..peerPort = info.peerPort;
+      completer.complete(ret);
+    }).catchError((e){
+      completer.completeError(e);
+    });
+     return completer.future;
+  }
   async.Future<HetiSocket> connect(String peerAddress, int peerPort) {
     async.Completer<HetiSocket> completer = new async.Completer();
     chrome.SocketProperties properties = new chrome.SocketProperties();

@@ -19,6 +19,7 @@ abstract class HetiSocket {
   heti.ArrayBuilder buffer = new heti.ArrayBuilder();
   async.Future<HetiSocket> connect(String peerAddress, int peerPort) ;
   async.Future<HetiSendInfo> send(List<int> data);
+  async.Future<HetiSocketInfo> getSocketInfo();
   async.Stream<HetiReceiveInfo> onReceive();
   bool isClosed = false;
   void close() {
@@ -47,6 +48,13 @@ class HetiNetworkInterface
   String address;
   int prefixLength;
   String name;
+}
+
+class HetiSocketInfo {
+  String peerAddress = "";
+  int peerPort = 0;
+  String localAddress = "";
+  int localPort = 0;
 }
 
 class HetiSendInfo {
