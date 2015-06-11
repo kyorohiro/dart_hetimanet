@@ -34,7 +34,7 @@ class HttpUrlDecoder {
       return {};
     }
 
-    List<String> pats = query.split(new RegExp("&|?"));
+    List<String> pats = query.split("&");
     for(String pat in pats) {
       List<String> pa = pat.split("=");
       String key = pa[0];
