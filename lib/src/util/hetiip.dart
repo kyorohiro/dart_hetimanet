@@ -1,4 +1,4 @@
-library hetimanet.util;
+library hetimanet.util.ip;
 
 class HetiIP {
   static List<int> toRawIP(String ip) {
