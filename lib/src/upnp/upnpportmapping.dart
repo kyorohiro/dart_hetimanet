@@ -1,4 +1,10 @@
-part of hetimanet.upnp;
+library hetimanet.upnp.sample;
+
+import 'dart:async' as async;
+import '../net/hetisocket.dart';
+import 'upnpdeviceinfo.dart';
+import 'upnpdevicesearcher.dart';
+import  'upnppppdevice.dart';
 
 class UpnpPortMappingSample {
   List<UpnpPPPDevice> foundPPPDevice = new List();

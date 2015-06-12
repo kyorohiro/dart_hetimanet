@@ -1,4 +1,12 @@
-part of hetimanet.upnp;
+library hetimanet.upnp.searcher;
+
+import 'dart:convert' as convert;
+import 'dart:async' as async;
+import 'package:hetimacore/hetimacore.dart';
+import '../net/hetisocket.dart';
+import '../http/hetihttp.dart';
+
+import 'upnpdeviceinfo.dart';
 
 class UpnpDeviceSearcher {
   static const String SSDP_ADDRESS = "239.255.255.250";
