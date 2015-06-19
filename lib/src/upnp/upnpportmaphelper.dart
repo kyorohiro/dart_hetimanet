@@ -14,6 +14,7 @@ import  'upnppppdevice.dart';
 class StartPortMapResult {
   
 }
+
 class UpnpPortMapHelper {
   String appid = "";
   String localAddress = "0.0.0.0";
@@ -21,8 +22,11 @@ class UpnpPortMapHelper {
   int _localPort = 18085;
   int numOfRetry = 0;
   int _externalPort = 18085;
+  String _externalAddress = "";
+
   int get externalPort => _externalPort;
   HetiSocketBuilder builder = null;
+  String get externalIp => _externalAddress;
 
   UpnpPortMapHelper(HetiSocketBuilder builder, String appid) {
     this.appid = appid;
@@ -48,6 +52,7 @@ class UpnpPortMapHelper {
         UpnpDeviceInfo info = searcher.deviceInfoList.first;
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
         pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse res) {
+          _externalAddress = res.externalIp;
           _controllerUpdateGlobalIp.add(res.externalIp);
         });
         int maxRetryExternalPort = _externalPort + numOfRetry;
