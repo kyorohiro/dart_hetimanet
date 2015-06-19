@@ -9,6 +9,11 @@ import  'upnppppdevice.dart';
 /**
  * app parts
  */
+
+
+class StartPortMapResult {
+  
+}
 class UpnpPortMapHelper {
   String appid = "";
   String localAddress = "0.0.0.0";
@@ -32,41 +37,49 @@ class UpnpPortMapHelper {
   async.StreamController<String> _controllerUpdateLocalIp = new async.StreamController.broadcast();
   async.Stream<String> get onUpdateLocalIp => _controllerUpdateLocalIp.stream;
 
-  void startPortMap() {
+  async.Future<StartPortMapResult> startPortMap() {
     _externalPort = basePort;
-    UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
-      searcher.searchWanPPPDevice().then((int e) {
+    return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
+      return searcher.searchWanPPPDevice().then((int e) {
         if (searcher.deviceInfoList.length <= 0) {
-          return;
+          throw {"failed":"not found rooter"};
         }
+
         UpnpDeviceInfo info = searcher.deviceInfoList.first;
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
         pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse res) {
           _controllerUpdateGlobalIp.add(res.externalIp);
         });
         int maxRetryExternalPort = _externalPort + numOfRetry;
+
         tryAddPortMap() {
-          pppDevice
+          return pppDevice
               .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, _localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, "hetim(${appid})", 0)
               .then((UpnpAddPortMappingResponse res) {
             if (200 == res.resultCode) {
               _controllerUpdateGlobalPort.add("${_externalPort}");
               searcher.close();
-              return;
+              return new StartPortMapResult();
             }
-            if (500 == res.resultCode) {
+            else if (500 == res.resultCode) {
               _externalPort++;
               if (_externalPort < maxRetryExternalPort) {
-                tryAddPortMap();
+                return tryAddPortMap();
+              } else {
+                throw {"failed":"redirect max"};
               }
             }
-          }).catchError((e) {
-            searcher.close();
+            else {
+              throw {"failed":"unexpected error code ${res.resultCode}"};
+            }
           });
         }
-        tryAddPortMap();
+
+        return tryAddPortMap();
+
       }).catchError((e) {
         searcher.close();
+        throw e;
       });
     });
   }
