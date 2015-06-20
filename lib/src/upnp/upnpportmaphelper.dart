@@ -9,12 +9,6 @@ import  'upnppppdevice.dart';
 /**
  * app parts
  */
-
-
-class StartPortMapResult {
-  
-}
-
 class UpnpPortMapHelper {
   String appid = "";
   String localAddress = "0.0.0.0";
@@ -58,6 +52,7 @@ class UpnpPortMapHelper {
         int maxRetryExternalPort = _externalPort + numOfRetry;
 
         tryAddPortMap() {
+          print("############### ${this._localPort} ${this.localAddress}");
           return pppDevice
               .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, _localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, "hetim(${appid})", 0)
               .then((UpnpAddPortMappingResponse res) {
@@ -134,28 +129,36 @@ class UpnpPortMapHelper {
     });
   }
 
-  async.Future<int> startGetLocalIp() {
-    async.Completer<int> completer = new async.Completer();
-    (this.builder).getNetworkInterfaces().then((List<HetiNetworkInterface> l) {
+  async.Future<StartGetLocalIPResult> startGetLocalIp() {
+    return (this.builder).getNetworkInterfaces().then((List<HetiNetworkInterface> l) {
       // search 24
       for (HetiNetworkInterface i in l) {
         if (i.prefixLength == 24 && !i.address.startsWith("127")) {
           _controllerUpdateLocalIp.add(i.address);
-          completer.complete(i.address);
-          return;
+          return new StartGetLocalIPResult(i.address, l);
         }
       }
       //
       for (HetiNetworkInterface i in l) {
         if (i.prefixLength == 64) {
           _controllerUpdateLocalIp.add(i.address);
-          completer.complete(i.address);
-          return;
+          return new StartGetLocalIPResult(i.address, l);
         }
       }
-    }).catchError((e) {
-      completer.completeError(e);
-    });
-    return completer.future;
+    });  
   }
+}
+
+class StartPortMapResult {
+  
+}
+
+class StartGetLocalIPResult {
+  StartGetLocalIPResult(String address, List<HetiNetworkInterface> l) {
+   localIP = address;
+   networkInterface.addAll(l);
+  }
+  String localIP = "";
+  bool get founded=> localIP != null;
+  List<HetiNetworkInterface> networkInterface = [];
 }
