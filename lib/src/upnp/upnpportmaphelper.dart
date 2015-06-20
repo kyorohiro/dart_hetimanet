@@ -4,7 +4,7 @@ import 'dart:async' as async;
 import '../net/hetisocket.dart';
 import 'upnpdeviceinfo.dart';
 import 'upnpdevicesearcher.dart';
-import  'upnppppdevice.dart';
+import 'upnppppdevice.dart';
 
 /**
  * app parts
@@ -35,12 +35,37 @@ class UpnpPortMapHelper {
   async.StreamController<String> _controllerUpdateLocalIp = new async.StreamController.broadcast();
   async.Stream<String> get onUpdateLocalIp => _controllerUpdateLocalIp.stream;
 
+  //
+  //
+  // ####
+  async.Future<StartGetExternalIp> startGetExternalIp() {
+    _externalPort = basePort;
+    return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
+      return searcher.searchWanPPPDevice().then((int e) {
+        if (searcher.deviceInfoList.length <= 0) {
+          throw {"failed": "not found rooter"};
+        }
+
+        UpnpDeviceInfo info = searcher.deviceInfoList.first;
+        UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+        pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse res) {
+          _externalAddress = res.externalIp;
+          _controllerUpdateGlobalIp.add(res.externalIp);
+          return new StartGetExternalIp(res.externalIp);
+        });
+      }).catchError((e) {
+        searcher.close();
+        throw e;
+      });
+    });
+  }
+
   async.Future<StartPortMapResult> startPortMap() {
     _externalPort = basePort;
     return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
       return searcher.searchWanPPPDevice().then((int e) {
         if (searcher.deviceInfoList.length <= 0) {
-          throw {"failed":"not found rooter"};
+          throw {"failed": "not found rooter"};
         }
 
         UpnpDeviceInfo info = searcher.deviceInfoList.first;
@@ -60,23 +85,20 @@ class UpnpPortMapHelper {
               _controllerUpdateGlobalPort.add("${_externalPort}");
               searcher.close();
               return new StartPortMapResult();
-            }
-            else if (500 == res.resultCode) {
+            } else if (500 == res.resultCode) {
               _externalPort++;
               if (_externalPort < maxRetryExternalPort) {
                 return tryAddPortMap();
               } else {
-                throw {"failed":"redirect max"};
+                throw {"failed": "redirect max"};
               }
-            }
-            else {
-              throw {"failed":"unexpected error code ${res.resultCode}"};
+            } else {
+              throw {"failed": "unexpected error code ${res.resultCode}"};
             }
           });
         }
 
         return tryAddPortMap();
-
       }).catchError((e) {
         searcher.close();
         throw e;
@@ -146,20 +168,27 @@ class UpnpPortMapHelper {
         }
       }
       return new StartGetLocalIPResult("0.0.0.0", l);
-    });  
+    });
   }
 }
 
-class StartPortMapResult {
+class StartPortMapResult {}
+
+class StartGetExternalIp {
+  String _externalIp = "";
+  String get externalIp => _externalIp;
   
+  StartGetExternalIp(String externalIp) {
+    this._externalIp = externalIp;
+  }
 }
 
 class StartGetLocalIPResult {
   StartGetLocalIPResult(String address, List<HetiNetworkInterface> l) {
-   localIP = address;
-   networkInterface.addAll(l);
+    localIP = address;
+    networkInterface.addAll(l);
   }
   String localIP = "";
-  bool get founded=> localIP != null;
+  bool get founded => localIP != null;
   List<HetiNetworkInterface> networkInterface = [];
 }
