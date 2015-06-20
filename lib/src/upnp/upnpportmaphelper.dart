@@ -13,7 +13,7 @@ class UpnpPortMapHelper {
   String appid = "";
   String localAddress = "0.0.0.0";
   int basePort = 18085;
-  int _localPort = 18085;
+  int localPort = 18085;
   int numOfRetry = 0;
   int _externalPort = 18085;
   String _externalAddress = "";
@@ -52,9 +52,9 @@ class UpnpPortMapHelper {
         int maxRetryExternalPort = _externalPort + numOfRetry;
 
         tryAddPortMap() {
-          print("############### ${this._localPort} ${this.localAddress}");
+          print("############### ${this.localPort} ${this.localAddress}");
           return pppDevice
-              .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, _localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, "hetim(${appid})", 0)
+              .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, "hetim(${appid})", 0)
               .then((UpnpAddPortMappingResponse res) {
             if (200 == res.resultCode) {
               _controllerUpdateGlobalPort.add("${_externalPort}");
