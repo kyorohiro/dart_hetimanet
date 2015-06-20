@@ -70,10 +70,6 @@ class UpnpPortMapHelper {
 
         UpnpDeviceInfo info = searcher.deviceInfoList.first;
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
-        pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse res) {
-          _externalAddress = res.externalIp;
-          _controllerUpdateGlobalIp.add(res.externalIp);
-        });
         int maxRetryExternalPort = _externalPort + numOfRetry;
 
         tryAddPortMap() {
