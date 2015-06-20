@@ -145,6 +145,7 @@ class UpnpPortMapHelper {
           return new StartGetLocalIPResult(i.address, l);
         }
       }
+      return new StartGetLocalIPResult("0.0.0.0", l);
     });  
   }
 }
