@@ -102,7 +102,7 @@ class UpnpPortMapHelper {
     });
   }
 
-  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deletePortList) {
+  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> externalPortList) {
     return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
       return searcher.searchWanPPPDevice().then((int e) {
         if (searcher.deviceInfoList.length <= 0) {
@@ -111,7 +111,7 @@ class UpnpPortMapHelper {
         List<async.Future> futures = [];
         UpnpDeviceInfo info = searcher.deviceInfoList.first;
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
-        for (int port in deletePortList) {
+        for (int port in externalPortList) {
           futures.add(pppDevice.requestDeletePortMapping(port, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP));
         }
         return async.Future.wait(futures).then((List<dynamic> d) {
