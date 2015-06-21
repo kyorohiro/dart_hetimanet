@@ -137,7 +137,7 @@ class UpnpPortMapHelper {
         tryGetPortMapInfo() {
           UpnpDeviceInfo info = searcher.deviceInfoList.first;
           UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
-          pppDevice.requestGetGenericPortMapping(index++).then((UpnpGetGenericPortMappingResponse res) {
+          return pppDevice.requestGetGenericPortMapping(index++).then((UpnpGetGenericPortMappingResponse res) {
             if (res.resultCode != 200) {
               return result;
             }
