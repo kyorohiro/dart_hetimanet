@@ -132,25 +132,24 @@ class UpnpPortMapHelper {
         }
 
         int index = 0;
-        List<int> deletePortList = [];
+        GetPortMapInfoResult result = new GetPortMapInfoResult();
 
         tryGetPortMapInfo() {
           UpnpDeviceInfo info = searcher.deviceInfoList.first;
           UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
           pppDevice.requestGetGenericPortMapping(index++).then((UpnpGetGenericPortMappingResponse res) {
             if (res.resultCode != 200) {
-              return new GetPortMapInfoResult();
+              return result;
             }
             String description = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewPortMappingDescription, "");
             String port = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "");
             String ip = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewInternalClient, "");
             if (target == null || description.contains(target)) {
               //"hetim(${appid})") {
-              int portAsNum = int.parse(port);
-              deletePortList.add(portAsNum);
+              result.add(ip, port, description);
             }
             if (port.replaceAll(" |\t|\r|\n", "") == "" && ip.replaceAll(" |\t|\r|\n", "") == "") {
-              return new GetPortMapInfoResult();
+              return result;
             }
             return tryGetPortMapInfo();
           }).catchError((e) {
@@ -186,7 +185,18 @@ class UpnpPortMapHelper {
 
 class DeleteAllPortMapResult {}
 class StartPortMapResult {}
-class GetPortMapInfoResult {}
+
+class PortMapInfo {
+  String description = "";
+  String port = "";
+  String ip = "";
+}
+class GetPortMapInfoResult {
+  List<PortMapInfo> infos = [];
+  add(String ip, String port,String description) {
+    infos.add(new PortMapInfo()..description=description..port=port..ip=ip);
+  }
+}
 
 class StartGetExternalIp {
   String _externalIp = "";
