@@ -21,7 +21,7 @@ class UpnpPortMapHelper {
   int get externalPort => _externalPort;
   HetiSocketBuilder builder = null;
   String get externalIp => _externalAddress;
-
+  String get appIdDesc => "hetim(${appid})";
   UpnpPortMapHelper(HetiSocketBuilder builder, String appid) {
     this.appid = appid;
     this.builder = builder;
@@ -75,7 +75,7 @@ class UpnpPortMapHelper {
         tryAddPortMap() {
           print("############### ${this.localPort} ${this.localAddress}");
           return pppDevice
-              .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, "hetim(${appid})", 0)
+              .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0)
               .then((UpnpAddPortMappingResponse res) {
             if (200 == res.resultCode) {
               _controllerUpdateGlobalPort.add("${_externalPort}");
@@ -102,42 +102,55 @@ class UpnpPortMapHelper {
     });
   }
 
-  async.Future<DeleteAllPortMapResult>  deleteAllPortMap() {
+  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deletePortList) {
     return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
-      searcher.searchWanPPPDevice().then((int e) {
+      return searcher.searchWanPPPDevice().then((int e) {
         if (searcher.deviceInfoList.length <= 0) {
-          throw {"failed":"not found router"};
+          throw {"failed": "not found router"};
+        }
+        int index = 0;
+        List<int> deletePortList = [];
+        List<async.Future> futures = [];
+        UpnpDeviceInfo info = searcher.deviceInfoList.first;
+        UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+        for (int port in deletePortList) {
+          futures.add(pppDevice.requestDeletePortMapping(port, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP));
+        }
+        return async.Future.wait(futures).then((List<dynamic> d) {
+          searcher.close();
+          return new DeleteAllPortMapResult();
+        });
+      });
+    });
+  }
+
+  async.Future<GetPortMapInfoResult> getPortMapInfo([String target = null]) {
+    return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
+      return searcher.searchWanPPPDevice().then((int e) {
+        if (searcher.deviceInfoList.length <= 0) {
+          throw {"failed": "not found router"};
         }
 
         int index = 0;
         List<int> deletePortList = [];
-        List<async.Future> futures = [];
-        deletePortMap(UpnpPPPDevice pppDevice) {
-          for (int port in deletePortList) {
-            futures.add(pppDevice.requestDeletePortMapping(port, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP));
-          }
-          return async.Future.wait(futures).then((List<dynamic> d){
-            searcher.close();
-            return new DeleteAllPortMapResult();
-          });
-        }
 
         tryGetPortMapInfo() {
           UpnpDeviceInfo info = searcher.deviceInfoList.first;
           UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
           pppDevice.requestGetGenericPortMapping(index++).then((UpnpGetGenericPortMappingResponse res) {
             if (res.resultCode != 200) {
-              return deletePortMap(pppDevice);
+              return new GetPortMapInfoResult();
             }
             String description = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewPortMappingDescription, "");
             String port = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "");
             String ip = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewInternalClient, "");
-            if (description == "hetim(${appid})") {
+            if (target == null || description.contains(target)) {
+              //"hetim(${appid})") {
               int portAsNum = int.parse(port);
               deletePortList.add(portAsNum);
             }
             if (port.replaceAll(" |\t|\r|\n", "") == "" && ip.replaceAll(" |\t|\r|\n", "") == "") {
-              return deletePortMap(pppDevice);
+              return new GetPortMapInfoResult();
             }
             return tryGetPortMapInfo();
           }).catchError((e) {
@@ -170,13 +183,15 @@ class UpnpPortMapHelper {
     });
   }
 }
+
 class DeleteAllPortMapResult {}
 class StartPortMapResult {}
+class GetPortMapInfoResult {}
 
 class StartGetExternalIp {
   String _externalIp = "";
   String get externalIp => _externalIp;
-  
+
   StartGetExternalIp(String externalIp) {
     this._externalIp = externalIp;
   }
