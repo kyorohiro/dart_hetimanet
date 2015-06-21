@@ -142,13 +142,15 @@ class UpnpPortMapHelper {
               return result;
             }
             String description = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewPortMappingDescription, "");
-            String port = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "");
+            String externalPort = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "");
+            String internalPort = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewInternalPort, "");
             String ip = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewInternalClient, "");
+            String type = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewProtocol, "");
             if (target == null || description.contains(target)) {
               //"hetim(${appid})") {
-              result.add(ip, port, description);
+              result.add(ip, internalPort, externalPort, description, type);
             }
-            if (port.replaceAll(" |\t|\r|\n", "") == "" && ip.replaceAll(" |\t|\r|\n", "") == "") {
+            if (externalPort.replaceAll(" |\t|\r|\n", "") == "" && ip.replaceAll(" |\t|\r|\n", "") == "") {
               return result;
             }
             return tryGetPortMapInfo();
@@ -188,13 +190,15 @@ class StartPortMapResult {}
 
 class PortMapInfo {
   String description = "";
-  String port = "";
+  String externalPort = "";
+  String internalPort = "";
   String ip = "";
+  String type = "";
 }
 class GetPortMapInfoResult {
   List<PortMapInfo> infos = [];
-  add(String ip, String port,String description) {
-    infos.add(new PortMapInfo()..description=description..port=port..ip=ip);
+  add(String ip, String internalPort, String externalPort,String description, String type) {
+    infos.add(new PortMapInfo()..description=description..externalPort=externalPort..ip=ip..type=type..internalPort=internalPort);
   }
 }
 
