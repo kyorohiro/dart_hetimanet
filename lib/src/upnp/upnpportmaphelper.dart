@@ -102,29 +102,32 @@ class UpnpPortMapHelper {
     });
   }
 
-  void deleteAllPortMap() {
-    UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
+  async.Future<DeleteAllPortMapResult>  deleteAllPortMap() {
+    return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
       searcher.searchWanPPPDevice().then((int e) {
         if (searcher.deviceInfoList.length <= 0) {
-          return;
+          throw {"failed":"not found router"};
         }
+
         int index = 0;
         List<int> deletePortList = [];
+        List<async.Future> futures = [];
         deletePortMap(UpnpPPPDevice pppDevice) {
           for (int port in deletePortList) {
-            pppDevice.requestDeletePortMapping(port, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP);
+            futures.add(pppDevice.requestDeletePortMapping(port, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP));
           }
-          new async.Future.delayed(new Duration(seconds: 5), () {
+          return async.Future.wait(futures).then((List<dynamic> d){
             searcher.close();
+            return new DeleteAllPortMapResult();
           });
         }
+
         tryGetPortMapInfo() {
           UpnpDeviceInfo info = searcher.deviceInfoList.first;
           UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
           pppDevice.requestGetGenericPortMapping(index++).then((UpnpGetGenericPortMappingResponse res) {
             if (res.resultCode != 200) {
-              deletePortMap(pppDevice);
-              return;
+              return deletePortMap(pppDevice);
             }
             String description = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewPortMappingDescription, "");
             String port = res.getValue(UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "");
@@ -134,15 +137,15 @@ class UpnpPortMapHelper {
               deletePortList.add(portAsNum);
             }
             if (port.replaceAll(" |\t|\r|\n", "") == "" && ip.replaceAll(" |\t|\r|\n", "") == "") {
-              deletePortMap(pppDevice);
-              return;
+              return deletePortMap(pppDevice);
             }
-            tryGetPortMapInfo();
+            return tryGetPortMapInfo();
           }).catchError((e) {
             searcher.close();
+            throw e;
           });
         }
-        tryGetPortMapInfo();
+        return tryGetPortMapInfo();
       });
     });
   }
@@ -167,7 +170,7 @@ class UpnpPortMapHelper {
     });
   }
 }
-
+class DeleteAllPortMapResult {}
 class StartPortMapResult {}
 
 class StartGetExternalIp {
