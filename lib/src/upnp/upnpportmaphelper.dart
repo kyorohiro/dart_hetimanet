@@ -108,8 +108,6 @@ class UpnpPortMapHelper {
         if (searcher.deviceInfoList.length <= 0) {
           throw {"failed": "not found router"};
         }
-        int index = 0;
-        List<int> deletePortList = [];
         List<async.Future> futures = [];
         UpnpDeviceInfo info = searcher.deviceInfoList.first;
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
