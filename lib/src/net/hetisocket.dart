@@ -21,6 +21,7 @@ abstract class HetiSocket {
   async.Future<HetiSendInfo> send(List<int> data);
   async.Future<HetiSocketInfo> getSocketInfo();
   async.Stream<HetiReceiveInfo> onReceive();
+  async.Stream<HetiCloseInfo> onClose();
   bool isClosed = false;
   void close() {
     buffer.immutable = true;
@@ -69,6 +70,10 @@ class HetiReceiveInfo {
   HetiReceiveInfo(List<int> _data) {
     data = _data;
   }
+}
+
+class HetiCloseInfo {
+  
 }
 
 //
