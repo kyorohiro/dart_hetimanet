@@ -102,6 +102,20 @@ class UpnpPortMapHelper {
     });
   }
 
+  async.Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc() {
+    return getPortMapInfo(appIdDesc).then((GetPortMapInfoResult result) {
+      List<int> externalPortList = [];
+      for(PortMapInfo info in result.infos) {
+        try{
+          externalPortList.add(int.parse(info.externalPort));
+        } catch(e) {
+          ;
+        }
+      }
+      return deleteAllPortMap(externalPortList);
+    });
+  }
+
   async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList) {
     return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
       return searcher.searchWanPPPDevice().then((int e) {
