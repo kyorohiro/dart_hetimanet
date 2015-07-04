@@ -29,7 +29,10 @@ class HetiServerSocketChrome extends HetiServerSocket {
         HetiChromeSocketManager.getInstance().addServer(info, server);
         completer.complete(server);
       });
-    }).catchError(completer.completeError);
+    }).catchError((e) {
+      completer.completeError(new HetiServerSocketError()..id=HetiServerSocketError.ID_START);
+    });
     return completer.future;
   }
 }
+

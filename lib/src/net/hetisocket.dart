@@ -14,6 +14,14 @@ abstract class HetiServerSocket {
   void close();
 }
 
+class HetiServerSocketError {
+  static const ID_NONE = 0;
+  static const ID_START = 1;
+  static const REASON_NONE = 0;
+  int id = 0;
+  int reason = 0;
+}
+
 abstract class HetiSocket {
   int lastUpdateTime = 0;
   heti.ArrayBuilder buffer = new heti.ArrayBuilder();
