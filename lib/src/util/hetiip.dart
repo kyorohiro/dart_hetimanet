@@ -72,4 +72,28 @@ class HetiIP {
     }
     return "${aa}${bb}";
   }
+  
+  static bool isIpV4(List<int> ip) {
+    if (ip.length == 4) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static bool isLocalNetwork(List<int> ip) {
+    if (ip.length == 4) {
+      if (ip[0] == 127 || ip[0] == 10 || ip[0] == 192) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (ip[0] == 0xfe && ip[1] == 0x80) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
 }
