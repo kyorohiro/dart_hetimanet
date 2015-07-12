@@ -22,9 +22,9 @@ class HttpUrlDecoder {
 
   static HttpUrlDecoder _sDecoder = new HttpUrlDecoder();
 
-  static HttpUrl decodeUrl(String _url) {
+  static HttpUrl decodeUrl(String _url,[String baseAddr=null]) {
     _sDecoder.clear();
-    return _sDecoder.innerDecodeUrl(_url);
+    return _sDecoder.innerDecodeUrl(_url, baseAddr);
   }
 
   static Map<String, String> queryMap(String query) {
@@ -48,7 +48,7 @@ class HttpUrlDecoder {
     url = null;
   }
 
-  HttpUrl innerDecodeUrl(String _url, [String baseAddr]) {
+  HttpUrl innerDecodeUrl(String _url, [String baseAddr=null]) {
     url = convert.UTF8.encode(_url);
     index = 0;
     HttpUrl ret = new HttpUrl();
