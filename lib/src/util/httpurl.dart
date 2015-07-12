@@ -10,7 +10,6 @@ class HttpUrl {
   static HttpUrl decode() {
     return null;
   }
-  
 }
 
 class HttpUrlDecoder {
@@ -28,17 +27,17 @@ class HttpUrlDecoder {
     return _sDecoder.innerDecodeUrl(_url);
   }
 
-  static Map<String,String> queryMap(String query) {
-    Map<String,String> ret = new Map();
-    if(query.length == 0 || !query.contains("=")) {
+  static Map<String, String> queryMap(String query) {
+    Map<String, String> ret = new Map();
+    if (query.length == 0 || !query.contains("=")) {
       return {};
     }
 
     List<String> pats = query.split("&");
-    for(String pat in pats) {
+    for (String pat in pats) {
       List<String> pa = pat.split("=");
       String key = pa[0];
-      String value = pat.substring(key.length+1);
+      String value = pat.substring(key.length + 1);
       ret[key] = value;
     }
     return ret;
@@ -49,14 +48,25 @@ class HttpUrlDecoder {
     url = null;
   }
 
-  HttpUrl innerDecodeUrl(String _url) {
+  HttpUrl innerDecodeUrl(String _url, [String baseAddr]) {
     url = convert.UTF8.encode(_url);
     index = 0;
     HttpUrl ret = new HttpUrl();
     try {
-      ret.scheme = scheme();
-      ret.host = host();
-      ret.port = port();
+      try {
+        ret.scheme = scheme();
+        ret.host = host();
+        ret.port = port();
+      } catch (e) {        
+        if (baseAddr == null) {
+          throw e;
+        }
+        HttpUrlDecoder dec = new HttpUrlDecoder();
+        HttpUrl base = dec.innerDecodeUrl(baseAddr);
+        ret.scheme = base.scheme;
+        ret.host = base.host;
+        ret.port = base.port;
+      }
       ret.path = path();
       ret.query = query();
     } catch (e) {
@@ -75,6 +85,7 @@ class HttpUrlDecoder {
       if (matchGroup(SCHEME_HTTPS)) {
         return "https";
       } else {
+        back();
         throw new ParseError();
       }
     } finally {
@@ -208,5 +219,4 @@ class HttpUrlDecoder {
     }
     return false;
   }
-
 }

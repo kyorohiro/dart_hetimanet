@@ -48,4 +48,14 @@ void main() {
      unit.expect(url.path, "/xxx");
      unit.expect(url.query, "sdfsdf=%01%02&aasdf_");
   });
+
+  unit.test("/xxx?sdfsdf=%01%02&aasdf_", () {
+     hetima.HttpUrlDecoder decoder = new hetima.HttpUrlDecoder();
+     hetima.HttpUrl url = decoder.innerDecodeUrl("/xxx?sdfsdf=%01%02&aasdf_", "https://google.com:18080");
+     unit.expect(url.scheme, "https");
+     unit.expect(url.host, "google.com");
+     unit.expect(url.port, 18080);
+     unit.expect(url.path, "/xxx");
+     unit.expect(url.query, "sdfsdf=%01%02&aasdf_");
+  });
 }
