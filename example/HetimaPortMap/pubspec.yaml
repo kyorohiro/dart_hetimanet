@@ -1,0 +1,15 @@
+name: HetimaPortMap
+version: 0.0.034
+author: kyorohiro
+description: port map chrome app
+dependencies:
+  chrome: any
+  dart_web_toolkit: any
+  hetimacore:
+    git: https://github.com/kyorohiro/dart_hetimacore.git
+  hetimanet:
+    path: ../../
+transformers:
+- chrome
+- $dart2js:
+    csp: true

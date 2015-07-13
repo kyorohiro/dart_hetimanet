@@ -11,7 +11,8 @@ import 'upnpdeviceinfo.dart';
 class UpnpDeviceSearcher {
   static const String SSDP_ADDRESS = "239.255.255.250";
   static const int SSDP_PORT = 1900;
-  static const String SSDP_M_SEARCH = """M-SEARCH * HTTP/1.1\r\n""" + """MX: 3\r\n""" + """HOST: 239.255.255.250:1900\r\n""" + """MAN: "ssdp:discover"\r\n""" + """ST: upnp:rootdevice\r\n""" + """\r\n""";
+  static const String SSDP_M_SEARCH =
+      """M-SEARCH * HTTP/1.1\r\n""" + """MX: 3\r\n""" + """HOST: 239.255.255.250:1900\r\n""" + """MAN: "ssdp:discover"\r\n""" + """ST: upnp:rootdevice\r\n""" + """\r\n""";
   static const String SSDP_M_SEARCH_WANPPPConnectionV1 = """M-SEARCH * HTTP/1.1\r\n""" +
       """MX: 3\r\n""" +
       """HOST: 239.255.255.250:1900\r\n""" +
@@ -113,10 +114,12 @@ class UpnpDeviceSearcher {
     HetiHttpResponse.decodeHttpMessage(parser).then((HetiHttpMessageWithoutBody message) {
       UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
       if (!deviceInfoList.contains(info)) {
-        deviceInfoList.add(info);
         info.extractService().then((int v) {
-          _streamer.add(info);
-        });
+          if (!deviceInfoList.contains(info)) {
+            deviceInfoList.add(info);
+            _streamer.add(info);
+          }
+        }).catchError((e) {});
       }
     });
   }
