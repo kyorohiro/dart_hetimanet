@@ -114,7 +114,7 @@ void startUpdateIpInfo() {
     for (hetima.HetiNetworkInterface i in interfaceList) {
       var interface = new appview.AppNetworkInterface();
       interface.ip = i.address;
-      interface.length = "${i.prefixLength}";
+      interface.fileSize = "${i.prefixLength}";
       interface.name = "${i.name}";
       mainView.addNetworkInterface(interface);
     }
