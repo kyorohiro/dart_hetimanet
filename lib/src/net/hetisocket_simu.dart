@@ -3,7 +3,7 @@ library hetimanet.simu;
 import 'dart:async';
 import 'hetisocket.dart';
 
-class HetiSocketBuilderSimu {
+class HetiSocketBuilderSimu extends HetiSocketBuilder {
   HetiSocket createClient() {
     return null;
   }
