@@ -107,7 +107,7 @@ class UpnpPortMapHelper {
   async.Future<List<UpnpDeviceInfo>> searchRoutder({bool reuseRouter: false}) {
     return new async.Future(() {
       if (reuseRouter == true && _currentUpnpDeviceInfo.length > 0) {
-        return _currentUpnpDeviceInfo[0];
+        return _currentUpnpDeviceInfo;
       } else {
         return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
           return searcher.searchWanPPPDevice().then((int e) {
