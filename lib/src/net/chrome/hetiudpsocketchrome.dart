@@ -47,6 +47,7 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
 
   async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) {
     async.Completer<HetiUdpSendInfo> completer = new async.Completer();
+    print("-------debug test send");
     chrome.sockets.udp.send(_info.socketId, new chrome.ArrayBuffer.fromBytes(buffer), address, port).then((chrome.SendInfo info) {
       completer.complete(new HetiUdpSendInfo(info.resultCode));      
     });
