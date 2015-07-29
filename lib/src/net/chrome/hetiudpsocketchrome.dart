@@ -26,6 +26,9 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
   }
 
   void onReceiveInternal(chrome.ReceiveInfo info){
+    if(_info.socketId != info.socketId) {
+      return;
+    }
     js.JsObject s= info.toJs();
     String remoteAddress = s["remoteAddress"];
     int remotePort = s["remotePort"];
