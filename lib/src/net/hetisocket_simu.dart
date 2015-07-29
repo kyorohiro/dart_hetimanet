@@ -33,7 +33,7 @@ class HetiUdpSocketSimu extends HetiUdpSocket {
   String get ip => _ip;
   int get port => _port;
 
-  Future<int> bind(String ip, int port) {
+  Future<int> bind(String ip, int port,{bool multicast:false}) {
     this._ip = ip;
     this._port = port;
     return new Future(() {

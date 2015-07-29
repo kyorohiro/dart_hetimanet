@@ -48,7 +48,7 @@ class UpnpDeviceSearcher {
 //      print("" + convert.UTF8.decode(info.data));
       extractDeviceInfoFromUdpResponse(info.data);
     });
-    return _socket.bind("0.0.0.0", 0);
+    return _socket.bind("0.0.0.0", 0, multicast:true);
   }
 
   bool get nowSearching => _nowSearching;
