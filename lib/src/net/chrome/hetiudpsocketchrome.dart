@@ -8,7 +8,7 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
   }
 
   async.Future<int> bind(String address, int port, {bool multicast:false}) {
-    chrome.sockets.udp.onReceive.listen(onReceiveInternal);
+    //chrome.sockets.udp.onReceive.listen(onReceiveInternal);
     async.Completer<int> completer = new async.Completer();
     chrome.SocketProperties properties = new chrome.SocketProperties();
     chrome.sockets.udp.create(properties).then((chrome.CreateInfo info) {
