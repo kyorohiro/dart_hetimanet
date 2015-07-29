@@ -114,7 +114,7 @@ void startUpdateIpInfo() {
     for (hetima.HetiNetworkInterface i in interfaceList) {
       var interface = new appview.AppNetworkInterface();
       interface.ip = i.address;
-      interface.fileSize = "${i.prefixLength}";
+      interface.length = "${i.prefixLength}";
       interface.name = "${i.name}";
       mainView.addNetworkInterface(interface);
     }
@@ -210,10 +210,10 @@ void startAddPortMapp(var i) {
     _showDialog("#### Port Map ####", result);
   }
   ;
-  pppDevice.requestAddPortMapping(int.parse(i.publicPort), i.protocol, int.parse(i._localPort), i.localIp, 1, i.description, 0).then((hetima.UpnpAddPortMappingResponse resp) {
+  pppDevice.requestAddPortMapping(int.parse(i.publicPort), i.protocol, int.parse(i.localPort), i.localIp, 1, i.description, 0).then((hetima.UpnpAddPortMappingResponse resp) {
     if (resp.resultCode == 405) {
       return pppDevice
-          .requestAddPortMapping(int.parse(i.publicPort), i.protocol, int.parse(i._localPort), i.localIp, 1, i.description, 0, hetima.UpnpPPPDevice.MODE_M_POST)
+          .requestAddPortMapping(int.parse(i.publicPort), i.protocol, int.parse(i.localPort), i.localIp, 1, i.description, 0, hetima.UpnpPPPDevice.MODE_M_POST)
           .then((hetima.UpnpAddPortMappingResponse resp) {
         showDialogAPM(resp);
       });
