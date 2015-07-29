@@ -32,6 +32,7 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
     js.JsObject s= info.toJs();
     String remoteAddress = s["remoteAddress"];
     int remotePort = s["remotePort"];
+    print("-------debug test onReceiveInternal");
     receiveStream.add(new HetiReceiveUdpInfo(info.data.getBytes(), remoteAddress, remotePort));
   }
 
