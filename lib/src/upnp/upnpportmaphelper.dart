@@ -56,7 +56,7 @@ class UpnpPortMapHelper {
     });
   }
 
-  async.Future<StartPortMapResult> startPortMap({bool reuseRouter: false}) {
+  async.Future<StartPortMapResult> startPortMap({bool reuseRouter: false,newProtocol:UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
     _externalPort = basePort;
     return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
       UpnpDeviceInfo info = deviceInfoList.first;
@@ -66,7 +66,7 @@ class UpnpPortMapHelper {
       tryAddPortMap() {
         print("############### ${this.localPort} ${this.localAddress}");
         return pppDevice
-            .requestAddPortMapping(_externalPort, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0)
+            .requestAddPortMapping(_externalPort, newProtocol, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0)
             .then((UpnpAddPortMappingResponse res) {
           if (200 == res.resultCode) {
             _controllerUpdateGlobalPort.add("${_externalPort}");
@@ -131,13 +131,13 @@ class UpnpPortMapHelper {
     _currentUpnpDeviceInfo.clear();
   }
 
-  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList, {bool reuseRouter: false}) {
+  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList, {bool reuseRouter: false,newProtocol:UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
     return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
       List<async.Future> futures = [];
       UpnpDeviceInfo info = deviceInfoList.first;
       UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
       for (int port in deleteExternalPortList) {
-        futures.add(pppDevice.requestDeletePortMapping(port, UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP));
+        futures.add(pppDevice.requestDeletePortMapping(port, newProtocol));
       }
       return async.Future.wait(futures).then((List<dynamic> d) {
         return new DeleteAllPortMapResult();
