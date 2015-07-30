@@ -90,7 +90,7 @@ class UpnpPortMapHelper {
     });
   }
 
-  async.Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false}) {
+  async.Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false, newProtocol:UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
     return getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter).then((GetPortMapInfoResult result) {
       List<int> externalPortList = [];
       for (PortMapInfo info in result.infos) {
@@ -100,7 +100,7 @@ class UpnpPortMapHelper {
           ;
         }
       }
-      return deleteAllPortMap(externalPortList);
+      return deleteAllPortMap(externalPortList,newProtocol:newProtocol);
     });
   }
 
