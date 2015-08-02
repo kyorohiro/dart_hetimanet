@@ -60,10 +60,10 @@ class UpnpDeviceSearcher {
   /**
    * create UPnPDeviceSearcher Object.
    */
-  static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder,{String address:"0.0.0.0"}) {
+  static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder,{String ip:"0.0.0.0"}) {
     async.Completer<UpnpDeviceSearcher> completer = new async.Completer();
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder);
-    returnValue._initialize(address).then((int v) {
+    returnValue._initialize(ip).then((int v) {
       if (v >= 0) {
         completer.complete(returnValue);
       } else {

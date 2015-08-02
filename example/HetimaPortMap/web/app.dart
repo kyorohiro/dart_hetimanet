@@ -6,8 +6,10 @@ import 'package:hetimanet/hetimanet_chrome.dart' as hetima;
 import 'package:HetimaPortMap/mainview.dart' as appview;
 //import 'package:HetimaPortMap/mainviewimpl.dart' deferred as impl;
 import 'package:HetimaPortMap/mainviewimpl.dart' as impl;
+import 'dart:async' as async;
 
-hetima.UpnpDeviceSearcher deviceSearcher = null;
+List<hetima.UpnpDeviceSearcher> deviceSearcher = [];
+Map<String, hetima.UpnpDeviceInfo> deviceInfoMap = {};
 var mainView = null;
 
 void main() {
@@ -55,34 +57,37 @@ void setupUI() {
   });
 }
 
-void setupUpnp() {
+async.Future setupUpnp() {
   print("### st setupUpnp");
-  hetima.UpnpDeviceSearcher.createInstance(new hetima.HetiSocketBuilderChrome()).then((hetima.UpnpDeviceSearcher searcher) {
-    print("### ok setupUpnp ${searcher}");
-    deviceSearcher = searcher;
-    searcher.onReceive().listen((hetima.UpnpDeviceInfo info) {
-      print("###log:" + info.toString());
-      mainView.addFoundRouterList(info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*"));
-    });
+  List<String> ipList = ["0.0.0.0"];
+  List<async.Future> searchFutures = [];
+  
+  return (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
+    mainView.clearNetworkInterface();
+    for (hetima.HetiNetworkInterface i in interfaceList) {
+      if(i.prefixLength == 24) {
+        ipList.add(i.address);
+      }
+    }
+    for(String ip in ipList) {
+      searchFutures.add(hetima.UpnpDeviceSearcher.createInstance(new hetima.HetiSocketBuilderChrome(),ip:ip));
+    }
+    return async.Future.wait(searchFutures);
+  }).then((List a) {
+    deviceSearcher.clear();
+    deviceSearcher.addAll(a);
   }).catchError((e) {
     print("### er setupUpnp ${e}");
   });
 }
 
 hetima.UpnpDeviceInfo getCurrentRouter() {
-  if (deviceSearcher.deviceInfoList.length <= 0) {
+  String key = mainView.currentSelectRouter();
+  if(deviceInfoMap.containsKey(key)) {
+    return deviceInfoMap[key];
+  } else {
     return null;
   }
-  String routerName = mainView.currentSelectRouter();
-  for (hetima.UpnpDeviceInfo info in deviceSearcher.deviceInfoList) {
-    if (info == null) {
-      continue;
-    }
-    if (routerName == info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*")) {
-      return info;
-    }
-  }
-  return deviceSearcher.deviceInfoList.first;
 }
 
 void startUpdateIpInfo() {
@@ -119,8 +124,6 @@ void startUpdateIpInfo() {
   }).catchError((e) {
     mainView.setGlobalIp("failed");
   });
-
-
 
   mainView.setRouterAddress(info.presentationURL);
 }
@@ -175,15 +178,30 @@ void startSearchPPPDevice() {
   }
   mainView.clearFoundRouterList();
 
-  deviceSearcher.searchWanPPPDevice().then((int v) {
+  List<async.Future> serchFutures = [];
+  for(hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
+    serchFutures.add(searcher.searchWanPPPDevice());
+  }
+  async.Future.wait(serchFutures).then((_){
     isSearching = false;
+    deviceInfoMap.clear();
     mainView.clearFoundRouterList();
-    if (deviceSearcher.deviceInfoList == null || deviceSearcher.deviceInfoList.length <= 0) {
+    bool isEmpty = true;
+    for (hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
+      if(searcher.deviceInfoList == null) {
+        continue;
+      }
+      for (hetima.UpnpDeviceInfo info in searcher.deviceInfoList) {
+        isEmpty = false;
+        String key ="${info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*")}@${info.getValue(hetima.UpnpDeviceInfo.KEY_LOCATION, "*")}";
+        if(!deviceInfoMap.containsKey(key)) {
+          deviceInfoMap[key] = info;
+          mainView.addFoundRouterList(key);
+        }
+      }
+    }    
+    if (isEmpty == true) {
       _showDialog("#### Search Router ####", "Not Found Router");
-      return;
-    }
-    for (hetima.UpnpDeviceInfo info in deviceSearcher.deviceInfoList) {
-      mainView.addFoundRouterList(info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*"));
     }
   }).catchError((e) {
     print("error ${e.toString()}");
