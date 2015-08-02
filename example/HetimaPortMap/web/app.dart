@@ -33,7 +33,7 @@ void setupUI() {
     setupUpnp().then((_) {
       return startSearchPPPDevice();
     }).catchError((e) {
-      _showDialog("#### Search Router ####", "Not Found Router");
+      _showDialog("#### Search Router ####", "Not Found Router (A)");
     });
   });
   mainView.onSelectTab.listen((int v) {
