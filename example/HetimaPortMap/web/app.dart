@@ -21,7 +21,6 @@ void main() {
       loader.remove();
     }
     setupUI();
-    setupUpnp();    
   }
 }
 
@@ -31,7 +30,11 @@ void setupUI() {
 
   mainView.onClickSearchButton.listen((int v) {
     print("### search router");
-    startSearchPPPDevice();
+    setupUpnp().then((_) {
+      return startSearchPPPDevice();
+    }).catchError((e) {
+      _showDialog("#### Search Router ####", "Not Found Router");
+    });
   });
   mainView.onSelectTab.listen((int v) {
     print("### select tag ${v}");
@@ -60,22 +63,29 @@ void setupUI() {
 async.Future setupUpnp() {
   print("### st setupUpnp");
   List<String> ipList = ["0.0.0.0"];
+  List<async.Future> closeFutures = [];
   List<async.Future> searchFutures = [];
-  
-  return (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
-    mainView.clearNetworkInterface();
-    for (hetima.HetiNetworkInterface i in interfaceList) {
-      if(i.prefixLength == 24) {
-        ipList.add(i.address);
+
+  for (hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
+    closeFutures.add(searcher.close());
+  }
+
+  return async.Future.wait(closeFutures).then((_) {
+    return (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
+      mainView.clearNetworkInterface();
+      for (hetima.HetiNetworkInterface i in interfaceList) {
+        if (i.prefixLength == 24) {
+          ipList.add(i.address);
+        }
       }
-    }
-    for(String ip in ipList) {
-      searchFutures.add(hetima.UpnpDeviceSearcher.createInstance(new hetima.HetiSocketBuilderChrome(),ip:ip));
-    }
-    return async.Future.wait(searchFutures);
-  }).then((List a) {
-    deviceSearcher.clear();
-    deviceSearcher.addAll(a);
+      for (String ip in ipList) {
+        searchFutures.add(hetima.UpnpDeviceSearcher.createInstance(new hetima.HetiSocketBuilderChrome(), ip: ip));
+      }
+      return async.Future.wait(searchFutures);
+    }).then((List a) {
+      deviceSearcher.clear();
+      deviceSearcher.addAll(a);
+    });
   }).catchError((e) {
     print("### er setupUpnp ${e}");
   });
@@ -83,8 +93,10 @@ async.Future setupUpnp() {
 
 hetima.UpnpDeviceInfo getCurrentRouter() {
   String key = mainView.currentSelectRouter();
-  if(deviceInfoMap.containsKey(key)) {
+  if (deviceInfoMap.containsKey(key)) {
     return deviceInfoMap[key];
+  } else if(deviceInfoMap.keys.length > 0){
+    return deviceInfoMap.values.first;
   } else {
     return null;
   }
@@ -177,29 +189,30 @@ void startSearchPPPDevice() {
     return;
   }
   mainView.clearFoundRouterList();
-
+  deviceInfoMap.clear();
   List<async.Future> serchFutures = [];
-  for(hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
+  for (hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
+    searcher.onReceive().listen((hetima.UpnpDeviceInfo info) {
+      String key = "${info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*")}@${info.getValue(hetima.UpnpDeviceInfo.KEY_LOCATION, "*")}";
+      if (!deviceInfoMap.containsKey(key)) {
+        deviceInfoMap[key] = info;
+        mainView.addFoundRouterList(key);
+      }
+    });
     serchFutures.add(searcher.searchWanPPPDevice());
   }
-  async.Future.wait(serchFutures).then((_){
+  async.Future.wait(serchFutures).then((_) {
     isSearching = false;
-    deviceInfoMap.clear();
-    mainView.clearFoundRouterList();
+
     bool isEmpty = true;
     for (hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
-      if(searcher.deviceInfoList == null) {
+      if (searcher.deviceInfoList == null) {
         continue;
       }
       for (hetima.UpnpDeviceInfo info in searcher.deviceInfoList) {
         isEmpty = false;
-        String key ="${info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*")}@${info.getValue(hetima.UpnpDeviceInfo.KEY_LOCATION, "*")}";
-        if(!deviceInfoMap.containsKey(key)) {
-          deviceInfoMap[key] = info;
-          mainView.addFoundRouterList(key);
-        }
       }
-    }    
+    }
     if (isEmpty == true) {
       _showDialog("#### Search Router ####", "Not Found Router");
     }
