@@ -90,6 +90,17 @@ void startUpdateIpInfo() {
     return;
   }
 
+  (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
+    mainView.clearNetworkInterface();
+    for (hetima.HetiNetworkInterface i in interfaceList) {
+      var interface = new appview.AppNetworkInterface();
+      interface.ip = i.address;
+      interface.length = "${i.prefixLength}";
+      interface.name = "${i.name}";
+      mainView.addNetworkInterface(interface);
+    }
+  });
+
   hetima.UpnpDeviceInfo info = getCurrentRouter();
   if (info == null) {
     return;
@@ -109,16 +120,7 @@ void startUpdateIpInfo() {
     mainView.setGlobalIp("failed");
   });
 
-  (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
-    mainView.clearNetworkInterface();
-    for (hetima.HetiNetworkInterface i in interfaceList) {
-      var interface = new appview.AppNetworkInterface();
-      interface.ip = i.address;
-      interface.length = "${i.prefixLength}";
-      interface.name = "${i.name}";
-      mainView.addNetworkInterface(interface);
-    }
-  });
+
 
   mainView.setRouterAddress(info.presentationURL);
 }

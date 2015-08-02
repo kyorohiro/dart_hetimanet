@@ -42,7 +42,7 @@ class UpnpDeviceSearcher {
     _socketBuilder = builder;
   }
 
-  async.Future<int> _initialize() {
+  async.Future<int> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
     _socket.onReceive().listen((HetiReceiveUdpInfo info) {
 //      print("" + convert.UTF8.decode(info.data));
@@ -60,10 +60,10 @@ class UpnpDeviceSearcher {
   /**
    * create UPnPDeviceSearcher Object.
    */
-  static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder) {
+  static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder,{String address:"0.0.0.0"}) {
     async.Completer<UpnpDeviceSearcher> completer = new async.Completer();
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder);
-    returnValue._initialize().then((int v) {
+    returnValue._initialize(address).then((int v) {
       if (v >= 0) {
         completer.complete(returnValue);
       } else {
@@ -79,7 +79,7 @@ class UpnpDeviceSearcher {
     return _streamer.stream;
   }
 
-  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 3]) {
+  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 5]) {
     async.Completer completer = new async.Completer();
 
     if (_nowSearching == true) {
