@@ -126,3 +126,48 @@ class HetiSocketDartIo extends HetiSocket {
     return new HetiSendInfo(0);
   }
 }
+
+class HetiUdpSocketDartIo extends HetiUdpSocket {
+  RawDatagramSocket _udpSocket = null;
+  HetiUdpSocketDartIo() {}
+
+  bool _isBindingNow = false;
+  async.StreamController<HetiReceiveUdpInfo> _receiveStream = new async.StreamController.broadcast();
+  
+  @override
+  async.Future<int> bind(String address, int port, {bool multicast: false}) async {
+    if (_isBindingNow != false) {
+      throw "now binding";
+    }
+    _isBindingNow = true;
+    try {
+      RawDatagramSocket socket = await RawDatagramSocket.bind(address, port, reuseAddress: true);
+      socket.multicastLoopback = multicast;
+      socket.listen((RawSocketEvent event) {
+        if(event == RawSocketEvent.READ) {
+          Datagram dg = socket.receive();
+          _receiveStream.add(new HetiReceiveUdpInfo(dg.data, dg.address.address, dg.port));
+        }
+      });
+    } finally {
+      _isBindingNow = false;
+    }
+    return 0;
+  }
+
+  @override
+  async.Future close() async {
+    _udpSocket.close();
+    return 0;
+  }
+
+  @override
+  async.Stream<HetiReceiveUdpInfo> onReceive() {
+    return _receiveStream.stream;
+  }
+
+  @override
+  async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) {
+   _udpSocket.send(buffer, new InternetAddress(address), port);
+  }
+}
