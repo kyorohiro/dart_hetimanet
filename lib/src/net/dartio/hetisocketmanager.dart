@@ -5,25 +5,55 @@ class HetiSocketBuilderChrome extends HetiSocketBuilder {
     return new HetiSocketDartIo();
   }
 
-  async.Future<HetiServerSocket> startServer(String address, int port) {}
-
-  HetiUdpSocket createUdpClient() {
-    
+  async.Future<HetiServerSocket> startServer(String address, int port) async {
+    return HetiServerSocketDartIo.startServer(address, port);
   }
+
+  HetiUdpSocket createUdpClient() {}
 
   async.Future<List<HetiNetworkInterface>> getNetworkInterfaces() async {
     List<NetworkInterface> interfaces = await NetworkInterface.list();
     List<HetiNetworkInterface> ret = [];
-    for(NetworkInterface i in interfaces) {
-      for(InternetAddress a in i.addresses) {
+    for (NetworkInterface i in interfaces) {
+      for (InternetAddress a in i.addresses) {
         int prefixLength = 24;
-        if(a.rawAddress.length > 4) {
+        if (a.rawAddress.length > 4) {
           prefixLength = 64;
         }
-        ret.add(new HetiNetworkInterface()..address=a.address..name=i.name..prefixLength=prefixLength);
+        ret.add(new HetiNetworkInterface()
+          ..address = a.address
+          ..name = i.name
+          ..prefixLength = prefixLength);
       }
     }
     return ret;
+  }
+}
+
+class HetiServerSocketDartIo extends HetiServerSocket {
+  ServerSocket _server = null;
+  async.StreamController<HetiSocket> _acceptStream = new async.StreamController.broadcast();
+
+  HetiServerSocketDartIo(ServerSocket server) {
+    _server = server;
+    _server.listen((Socket socket) {
+      _acceptStream.add(new HetiSocketDartIo.fromSocket(socket));
+    });
+  }
+
+  static async.Future<HetiServerSocket> startServer(String address, int port) async {
+    ServerSocket server = await ServerSocket.bind(address, port);
+    return new HetiServerSocketDartIo(server);
+  }
+
+  @override
+  void close() {
+    _server.close();
+  }
+
+  @override
+  async.Stream<HetiSocket> onAccept() {
+    return _acceptStream.stream;
   }
 }
 
@@ -31,6 +61,9 @@ class HetiSocketDartIo extends HetiSocket {
   Socket _socket = null;
 
   HetiSocketDartIo() {}
+  HetiSocketDartIo.fromSocket(Socket socket) {
+    _socket = socket;
+  }
 
   bool _nowConnecting = false;
   async.StreamController<HetiCloseInfo> _closeStream = new async.StreamController.broadcast();
