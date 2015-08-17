@@ -15,8 +15,18 @@ a() async {
   helper.localAddress = "192.168.1.26";
   try {
     StartGetExternalIp exIP = await helper.startGetExternalIp(reuseRouter: true);
-    print("#########${exIP.externalIp}");
+    print("<exip> ${exIP.externalIp}");
   } catch (e) {
-    print("####${e}");
+    print("<exip ERROR> ${e}");
   }
+  
+  try {
+    StartGetLocalIPResult exIP = await helper.startGetLocalIp();
+    for(HetiNetworkInterface i in exIP.networkInterface) {
+      print("<loip> ${i.address} ${i.name}");      
+    }
+  } catch (e) {
+    print("<loip ERROR> ${e}");
+  }
+  
 }
