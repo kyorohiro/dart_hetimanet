@@ -156,11 +156,11 @@ class UpnpDeviceInfo {
       return new async.Future.delayed(new Duration(seconds:1)).then((_){
       //
       //
-      //print("-----get[2-0] ${res.body.immutable}");
+      print("-----get[2-0] ${res.body.immutable}");
       //print("S1 ${res.body.rawcompleterFin.isCompleted}");
       //return res.body.onFin().then((b) {
       return res.body.rawcompleterFin.future.then((b){
-        //print("-----get[2-1]");
+        print("-----get[2-1]");
         return res.body.getLength().then((int length) {
           //print("-----get[2-2]");
           return res.body.getByteFuture(0, length).then((List<int> v) {

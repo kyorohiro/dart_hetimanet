@@ -79,7 +79,7 @@ class HetiSocketDartIo extends HetiSocket {
     try {
       _socket = await Socket.connect(peerAddress, peerPort);
       _socket.listen((List<int> data) {
-        print('<<<lis>>> ${data.length} ${UTF8.decode(data)}');
+        print('<<<lis>>> ');//${data.length} ${UTF8.decode(data)}');
         this.buffer.appendIntList(data,0, data.length);
         _receiveStream.add(new HetiReceiveInfo(data));
       }, onDone: () {
