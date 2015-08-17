@@ -45,7 +45,7 @@ class UpnpDeviceSearcher {
   async.Future<int> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
     _socket.onReceive().listen((HetiReceiveUdpInfo info) {
-//      print("" + convert.UTF8.decode(info.data));
+      print("+++++++" + convert.UTF8.decode(info.data)+"+++++++");
       extractDeviceInfoFromUdpResponse(info.data);
     });
     return _socket.bind(address, 0, multicast:true);
@@ -98,7 +98,7 @@ class UpnpDeviceSearcher {
       completer.completeError(new UpnpDeviceSearcherException("failed search", UpnpDeviceSearcherException.FAILED_SEARCH));
     });
 
-    new async.Future.delayed(new Duration(seconds: (timeoutSec + 1)), () {
+    new async.Future.delayed(new Duration(seconds: (timeoutSec +3)), () {
       _nowSearching = false;
       completer.complete({});
     });
@@ -112,6 +112,7 @@ class UpnpDeviceSearcher {
     EasyParser parser = new EasyParser(builder);
     builder.appendIntList(buffer, 0, buffer.length);
     HetiHttpResponse.decodeHttpMessage(parser).then((HetiHttpMessageWithoutBody message) {
+
       UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
       if (!deviceInfoList.contains(info)) {
         info.extractService().then((int v) {

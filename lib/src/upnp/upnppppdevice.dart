@@ -179,7 +179,7 @@ class UpnpPPPDevice {
         });
       }
     }).then((HetiHttpClientResponse response) {
-      return response.body.onFin().then((bool v) {
+      return response.body.rawcompleterFin.future.then((bool v) {
         return response.body.getLength();
       }).then((int length) {
         return response.body.getByteFuture(0, length);

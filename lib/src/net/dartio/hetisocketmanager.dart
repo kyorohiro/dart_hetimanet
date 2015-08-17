@@ -14,7 +14,7 @@ class HetiSocketBuilderChrome extends HetiSocketBuilder {
   }
 
   async.Future<List<HetiNetworkInterface>> getNetworkInterfaces() async {
-    List<NetworkInterface> interfaces = await NetworkInterface.list();
+    List<NetworkInterface> interfaces = await NetworkInterface.list(includeLoopback: true, includeLinkLocal: true);
     List<HetiNetworkInterface> ret = [];
     for (NetworkInterface i in interfaces) {
       for (InternetAddress a in i.addresses) {
@@ -79,13 +79,15 @@ class HetiSocketDartIo extends HetiSocket {
     try {
       _socket = await Socket.connect(peerAddress, peerPort);
       _socket.listen((List<int> data) {
-        buffer.appendIntList(data);
+        print('<<<lis>>> ${data.length} ${UTF8.decode(data)}');
+        this.buffer.appendIntList(data,0, data.length);
+        _receiveStream.add(new HetiReceiveInfo(data));
       }, onDone: () {
-        print('Done');
+        print('<<<Done>>>');
         _socket.close();
         _closeStream.add(new HetiCloseInfo());
       }, onError: (e) {
-        print('Got error $e');
+        print('<<<Got error>>> $e');
         _socket.close();
         _closeStream.add(new HetiCloseInfo());
       });
@@ -144,10 +146,12 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
     _isBindingNow = true;
     try {
       RawDatagramSocket socket = await RawDatagramSocket.bind(address, port, reuseAddress: true);
+      _udpSocket = socket;
       socket.multicastLoopback = multicast;
       socket.listen((RawSocketEvent event) {
         if(event == RawSocketEvent.READ) {
           Datagram dg = socket.receive();
+          print("read ${dg.address}:${dg.port} ${dg.data.length}");
           _receiveStream.add(new HetiReceiveUdpInfo(dg.data, dg.address.address, dg.port));
         }
       });
@@ -169,7 +173,8 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
   }
 
   @override
-  async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) {
+  async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) async {
    _udpSocket.send(buffer, new InternetAddress(address), port);
+   return await new HetiUdpSendInfo(0);
   }
 }

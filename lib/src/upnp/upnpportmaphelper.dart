@@ -110,7 +110,7 @@ class UpnpPortMapHelper {
         return _currentUpnpDeviceInfo;
       } else {
         return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
-          return searcher.searchWanPPPDevice().then((int e) {
+          return searcher.searchWanPPPDevice(5).then((_) {
             if (searcher.deviceInfoList.length <= 0) {
               throw {"failed": "not found router"};
             }

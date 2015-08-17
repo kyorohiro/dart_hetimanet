@@ -55,9 +55,7 @@ class ChunkedBuilderAdapter extends HetimaReader {
     return _buffer.getLength();
   }
 
-  async.Future<bool> onFin() {
-    return _buffer.onFin();
-  }
+  async.Completer<bool> get rawcompleterFin => _buffer.rawcompleterFin;
 
   async.Future<List<int>> getByteFuture(int index, int length) {
     return _buffer.getByteFuture(index, length);

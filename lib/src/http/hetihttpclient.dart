@@ -182,9 +182,11 @@ class HetiHttpClient {
         result.body = new HetimaReaderAdapter(socket.buffer, message.index);
         if (result.message.contentLength > 0) {
           result.body.getByteFuture(message.index + result.message.contentLength - 1, 1).then((e) {
+            print("-------------------- immutable =true;");
             result.body.immutable = true;
           });
         } else {
+          print("-------------------- immutable =true;");
           result.body.immutable = true;
         }
       } else {

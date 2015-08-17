@@ -42,7 +42,7 @@ void main() {
           });
         } else {
           print("--##AA02-");
-          res.body.onFin().then((e) {
+          res.body.onFin.then((e) {
             res.body.getLength().then((int size) {
               client.close();
               print("--##AA02 BB-" + size.toString());
