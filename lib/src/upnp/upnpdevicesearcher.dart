@@ -45,7 +45,7 @@ class UpnpDeviceSearcher {
   async.Future<int> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
     _socket.onReceive().listen((HetiReceiveUdpInfo info) {
-      print("+++++++" + convert.UTF8.decode(info.data)+"+++++++");
+     // print("+++++++" + convert.UTF8.decode(info.data)+"+++++++");
       extractDeviceInfoFromUdpResponse(info.data);
     });
     return _socket.bind(address, 0, multicast:true);

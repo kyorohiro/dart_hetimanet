@@ -46,7 +46,7 @@ class HetiHttpClient {
       completer.completeError(new Exception(""));
       return completer.future;
     }
-    print("###connet ${socket}");
+    //print("###connet ${socket}");
     socket.connect(host, port).then((HetiSocket socket) {
       if (socket == null) {
         completer.completeError(new Exception(""));
@@ -79,7 +79,7 @@ class HetiHttpClient {
     builder.appendString("\r\n");
 
     socket.onReceive().listen((HetiReceiveInfo info) {
-      print("Length" + path + ":" + info.data.length.toString());
+      //print("Length" + path + ":" + info.data.length.toString());
     });
     socket.send(builder.toList()).then((HetiSendInfo info) {});
 
@@ -115,7 +115,7 @@ class HetiHttpClient {
     //
     builder.getLength().then((int len) {
       builder.getByteFuture(0, len).then((List<int> data) {
-        print("request\r\n" + convert.UTF8.decode(data));
+        //print("request\r\n" + convert.UTF8.decode(data));
       });
     });
     //
@@ -154,7 +154,7 @@ class HetiHttpClient {
     //
     builder.getLength().then((int len) {
       builder.getByteFuture(0, len).then((List<int> data) {
-        print("request\r\n" + convert.UTF8.decode(data));
+        //print("request\r\n" + convert.UTF8.decode(data));
       });
     });
     //
@@ -173,7 +173,7 @@ class HetiHttpClient {
       //
       {
         socket.buffer.getByteFuture(0, message.index).then((List<int> buffer) {
-          print("response\r\n" + convert.UTF8.decode(buffer));
+          //print("response\r\n" + convert.UTF8.decode(buffer));
         });
       }
       //
@@ -182,11 +182,11 @@ class HetiHttpClient {
         result.body = new HetimaReaderAdapter(socket.buffer, message.index);
         if (result.message.contentLength > 0) {
           result.body.getByteFuture(message.index + result.message.contentLength - 1, 1).then((e) {
-            print("-------------------- immutable =true;");
+           // print("-------------------- immutable =true;");
             result.body.immutable = true;
           });
         } else {
-          print("-------------------- immutable =true;");
+          //print("-------------------- immutable =true;");
           result.body.immutable = true;
         }
       } else {

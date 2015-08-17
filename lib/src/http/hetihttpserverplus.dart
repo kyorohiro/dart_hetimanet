@@ -42,7 +42,7 @@ class HetiHttpServerHelper {
   }
 
   async.Future<HetiHttpStartServerResult> startServer() {
-    print("startServer");
+    //print("startServer");
     _localPort = basePort;
     async.Completer<HetiHttpStartServerResult> completer = new async.Completer();
     if (_server != null) {
@@ -63,7 +63,7 @@ class HetiHttpServerHelper {
   }
 
   void _hundleRequest(HetiHttpServerRequest req) {
-    print("${req.info.line.requestTarget}");
+   // print("${req.info.line.requestTarget}");
     if (req.info.line.requestTarget.length < 0) {
       req.socket.close();
       return;
@@ -104,7 +104,7 @@ class HetiHttpServerHelper {
         response.appendString("${key}: ${header[key]}\r\n");
       }
       response.appendString("\r\n");
-      print(response.toText());
+      //print(response.toText());
       socket.send(response.toList()).then((HetiSendInfo i) {
         _startResponseBuffer(socket, file, start, contentLength);
       }).catchError((e) {
@@ -141,7 +141,7 @@ class HetiHttpServerHelper {
       if (end > (index + length)) {
         end = (index + length);
       }
-      print("####### ${start} ${end}");
+      //print("####### ${start} ${end}");
       file.read(start, end-start).then((ReadResult readResult) {
         return socket.send(readResult.buffer);
       }).then((HetiSendInfo i) {

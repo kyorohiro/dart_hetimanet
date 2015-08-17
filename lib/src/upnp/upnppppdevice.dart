@@ -30,7 +30,7 @@ class UpnpPPPDevice {
     String b = "";
     List<String> v = st.replaceAll(" |\t|\r|\n", "").split(":");
     _version = v.last;
-    print("${_version}");
+    //print("${_version}");
   }
 
   /**
@@ -184,7 +184,7 @@ class UpnpPPPDevice {
       }).then((int length) {
         return response.body.getByteFuture(0, length);
       }).then((List<int> body) {
-        print(convert.UTF8.decode(body));
+        //print(convert.UTF8.decode(body));
         completer.complete(new UpnpPPPDeviceRequestResponse(response.message.line.statusCode, convert.UTF8.decode(body)));
       });
     }).catchError((e) {

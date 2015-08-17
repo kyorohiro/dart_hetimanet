@@ -64,7 +64,7 @@ class UpnpPortMapHelper {
       int maxRetryExternalPort = _externalPort + numOfRetry;
 
       tryAddPortMap() {
-        print("############### ${this.localPort} ${this.localAddress}");
+        //print("############### ${this.localPort} ${this.localAddress}");
         return pppDevice
             .requestAddPortMapping(_externalPort, newProtocol, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0)
             .then((UpnpAddPortMappingResponse res) {
