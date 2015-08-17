@@ -79,7 +79,7 @@ class UpnpDeviceSearcher {
     return _streamer.stream;
   }
 
-  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 5]) {
+  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 6]) {
     async.Completer completer = new async.Completer();
 
     if (_nowSearching == true) {
@@ -89,16 +89,16 @@ class UpnpDeviceSearcher {
 
     deviceInfoList.clear();
 
-    _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANPPPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec}")), SSDP_ADDRESS, SSDP_PORT).then((HetiUdpSendInfo iii) {
-      return _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec}")), SSDP_ADDRESS, SSDP_PORT);
+    _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANPPPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT).then((HetiUdpSendInfo iii) {
+      return _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
     }).then((HetiUdpSendInfo iii) {
-      return _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV2.replaceAll("MX: 3", "MX: ${timeoutSec}")), SSDP_ADDRESS, SSDP_PORT);
+      return _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV2.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
     }).catchError((e) {
       _nowSearching = false;
       completer.completeError(new UpnpDeviceSearcherException("failed search", UpnpDeviceSearcherException.FAILED_SEARCH));
     });
 
-    new async.Future.delayed(new Duration(seconds: (timeoutSec +3)), () {
+    new async.Future.delayed(new Duration(seconds: (timeoutSec)), () {
       _nowSearching = false;
       completer.complete({});
     });
