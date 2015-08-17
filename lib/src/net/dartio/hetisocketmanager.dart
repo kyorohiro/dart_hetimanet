@@ -9,7 +9,9 @@ class HetiSocketBuilderChrome extends HetiSocketBuilder {
     return HetiServerSocketDartIo.startServer(address, port);
   }
 
-  HetiUdpSocket createUdpClient() {}
+  HetiUdpSocket createUdpClient() {
+    return new HetiUdpSocketDartIo();
+  }
 
   async.Future<List<HetiNetworkInterface>> getNetworkInterfaces() async {
     List<NetworkInterface> interfaces = await NetworkInterface.list();
