@@ -192,7 +192,7 @@ void startSearchPPPDevice() {
   deviceInfoMap.clear();
   List<async.Future> serchFutures = [];
   for (hetima.UpnpDeviceSearcher searcher in deviceSearcher) {
-    searcher.onReceive().listen((hetima.UpnpDeviceInfo info) {
+    searcher.onReceive.listen((hetima.UpnpDeviceInfo info) {
       String key = "${info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*")}@${info.getValue(hetima.UpnpDeviceInfo.KEY_LOCATION, "*")}";
       if (!deviceInfoMap.containsKey(key)) {
         deviceInfoMap[key] = info;

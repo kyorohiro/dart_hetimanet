@@ -57,9 +57,7 @@ class UpnpDeviceSearcher {
 
   bool get nowSearching => _nowSearching;
 
-  Future<int> close() {
-    return _socket.close();
-  }
+  Future<int> close() => _socket.close();
 
   /**
    * create UPnPDeviceSearcher Object.
@@ -74,38 +72,28 @@ class UpnpDeviceSearcher {
     }
   }
 
-  Stream<UpnpDeviceInfo> onReceive() {
-    return _streamer.stream;
-  }
+  Stream<UpnpDeviceInfo> get onReceive => _streamer.stream;
 
-  Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) {
-    Completer completer = new Completer();
-
+  Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) async {
     if (_nowSearching == true) {
-      completer.completeError(new UpnpDeviceSearcherException("already run", UpnpDeviceSearcherException.ALREADY_RUN));
-      return completer.future;
+      throw new UpnpDeviceSearcherException("already run", UpnpDeviceSearcherException.ALREADY_RUN);
     }
-
+    _nowSearching = true;
     deviceInfoList.clear();
 
-    _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANPPPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT).then((HetiUdpSendInfo iii) {
-      return _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
-    }).then((HetiUdpSendInfo iii) {
-      return _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV2.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
-    }).catchError((e) {
+    try {
+      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANPPPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
+      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
+      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV2.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
+    } catch (e) {
       _nowSearching = false;
-      completer.completeError(new UpnpDeviceSearcherException("failed search", UpnpDeviceSearcherException.FAILED_SEARCH));
-    });
+      throw new UpnpDeviceSearcherException("failed search", UpnpDeviceSearcherException.FAILED_SEARCH);
+    }
 
-    new Future.delayed(new Duration(seconds: (timeoutSec)), () {
+    return new Future.delayed(new Duration(seconds: (timeoutSec)), () {
       _nowSearching = false;
-      if(completer.isCompleted == false) {
-        completer.complete({});
-      }
+      return {};
     });
-
-    _nowSearching = true;
-    return completer.future;
   }
 
   void extractDeviceInfoFromUdpResponse(List<int> buffer) {
