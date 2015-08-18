@@ -41,56 +41,47 @@ class UpnpPortMapHelper {
   //
   //
   // ####
-  async.Future<StartGetExternalIp> startGetExternalIp({bool reuseRouter: false}) {
+  async.Future<StartGetExternalIp> startGetExternalIp({bool reuseRouter: false}) async {
     _externalPort = basePort;
-    return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
-      UpnpDeviceInfo info = deviceInfoList.first;
-      UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
-      return pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse res) {
-        _externalAddress = res.externalIp;
-        _controllerUpdateGlobalIp.add(res.externalIp);
-        return new StartGetExternalIp(res.externalIp);
-      });
-    }).catchError((e) {
-      throw e;
-    });
+    List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
+    UpnpDeviceInfo info = deviceInfoList.first;
+    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+    UpnpGetExternalIPAddressResponse res = await pppDevice.requestGetExternalIPAddress();
+    _externalAddress = res.externalIp;
+    _controllerUpdateGlobalIp.add(res.externalIp);
+    return new StartGetExternalIp(res.externalIp);
   }
 
-  async.Future<StartPortMapResult> startPortMap({bool reuseRouter: false,newProtocol:UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
+  async.Future<StartPortMapResult> startPortMap({bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) async {
     _externalPort = basePort;
-    return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
-      UpnpDeviceInfo info = deviceInfoList.first;
-      UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
-      int maxRetryExternalPort = _externalPort + numOfRetry;
+    List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
 
-      tryAddPortMap() {
-        //print("############### ${this.localPort} ${this.localAddress}");
-        return pppDevice
-            .requestAddPortMapping(_externalPort, newProtocol, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0)
-            .then((UpnpAddPortMappingResponse res) {
-          if (200 == res.resultCode) {
-            _controllerUpdateGlobalPort.add("${_externalPort}");
-            return new StartPortMapResult();
-          } else if (500 == res.resultCode) {
-            _externalPort++;
-            if (_externalPort < maxRetryExternalPort) {
-              return tryAddPortMap();
-            } else {
-              throw {"failed": "redirect max"};
-            }
+    UpnpDeviceInfo info = deviceInfoList.first;
+    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+    int maxRetryExternalPort = _externalPort + numOfRetry;
+
+    tryAddPortMap() {
+      return pppDevice.requestAddPortMapping(_externalPort, newProtocol, localPort, localAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0).then((UpnpAddPortMappingResponse res) {
+        if (200 == res.resultCode) {
+          _controllerUpdateGlobalPort.add("${_externalPort}");
+          return new StartPortMapResult();
+        } else if (500 == res.resultCode) {
+          _externalPort++;
+          if (_externalPort < maxRetryExternalPort) {
+            return tryAddPortMap();
           } else {
-            throw {"failed": "unexpected error code ${res.resultCode}"};
+            throw {"failed": "redirect max"};
           }
-        });
-      }
+        } else {
+          throw {"failed": "unexpected error code ${res.resultCode}"};
+        }
+      });
+    }
 
-      return tryAddPortMap();
-    }).catchError((e) {
-      throw e;
-    });
+    return tryAddPortMap();
   }
 
-  async.Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false, newProtocol:UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
+  async.Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
     return getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter).then((GetPortMapInfoResult result) {
       List<int> externalPortList = [];
       for (PortMapInfo info in result.infos) {
@@ -100,7 +91,7 @@ class UpnpPortMapHelper {
           ;
         }
       }
-      return deleteAllPortMap(externalPortList,newProtocol:newProtocol);
+      return deleteAllPortMap(externalPortList, newProtocol: newProtocol);
     });
   }
 
@@ -131,7 +122,7 @@ class UpnpPortMapHelper {
     _currentUpnpDeviceInfo.clear();
   }
 
-  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList, {bool reuseRouter: false,newProtocol:UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
+  async.Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList, {bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
     return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
       List<async.Future> futures = [];
       UpnpDeviceInfo info = deviceInfoList.first;
