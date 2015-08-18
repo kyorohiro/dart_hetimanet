@@ -1,11 +1,10 @@
 part of hetimanet.chrome;
 
 class HetimaSocketChrome extends HetimaSocket {
-
   bool _isClose = false;
   int clientSocketId;
   StreamController<HetimaReceiveInfo> _controllerReceive = new StreamController.broadcast();
-  StreamController<HetimaCloseInfo> _controllerClose= new StreamController.broadcast();
+  StreamController<HetimaCloseInfo> _controllerClose = new StreamController.broadcast();
   HetimaSocketChrome.empty() {}
 
   HetimaSocketChrome(int _clientSocketId) {
@@ -23,48 +22,35 @@ class HetimaSocketChrome extends HetimaSocket {
     _controllerReceive.add(new HetimaReceiveInfo(info.data.getBytes()));
   }
 
-  Future<HetimaSendInfo> send(List<int> data) {
+  Future<HetimaSendInfo> send(List<int> data) async {
     updateTime();
-    Completer<HetimaSendInfo> completer = new Completer();
-    new Future.sync(() {
-      chrome.ArrayBuffer buffer = new chrome.ArrayBuffer.fromBytes(data);
-      return chrome.sockets.tcp.send(clientSocketId, buffer).then((chrome.SendInfo info) {
-        updateTime();
-        completer.complete(new HetimaSendInfo(info.resultCode));
-      });
-    }).catchError((e) {
-      completer.complete(new HetimaSendInfo(-1999));
-    });
-    return completer.future;
+    chrome.ArrayBuffer buffer = new chrome.ArrayBuffer.fromBytes(data);
+    chrome.SendInfo info = await chrome.sockets.tcp.send(clientSocketId, buffer);
+    updateTime();
+    if(info.resultCode < 0) {
+      throw info.resultCode;
+    }
+    return new HetimaSendInfo(info.resultCode);
   }
 
-  Future<HetimaSocketInfo> getSocketInfo() {
-    Completer<HetimaSocketInfo> completer = new Completer();
-    
-    chrome.sockets.tcp.getInfo(clientSocketId).then((chrome.SocketInfo info) {
-      HetimaSocketInfo ret = new HetimaSocketInfo()
+  Future<HetimaSocketInfo> getSocketInfo() async {
+    chrome.SocketInfo info = await chrome.sockets.tcp.getInfo(clientSocketId);
+    HetimaSocketInfo ret = new HetimaSocketInfo()
       ..localAddress = info.localAddress
       ..localPort = info.localPort
       ..peerAddress = info.peerAddress
       ..peerPort = info.peerPort;
-      completer.complete(ret);
-    }).catchError((e){
-      completer.completeError(e);
-    });
-     return completer.future;
+    return ret;
   }
-  Future<HetimaSocket> connect(String peerAddress, int peerPort) {
-    Completer<HetimaSocket> completer = new Completer();
+
+  Future<HetimaSocket> connect(String peerAddress, int peerPort) async {
     chrome.SocketProperties properties = new chrome.SocketProperties();
-    chrome.sockets.tcp.create(properties).then((chrome.CreateInfo info) {
-      return chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort).then((int e) {
-          chrome.sockets.tcp.setPaused(info.socketId, false);
-          clientSocketId = info.socketId;
-          HetimaChromeSocketManager.getInstance().addClient(info.socketId, this);
-          completer.complete(this);
-      });
-    }).catchError(completer.completeError);
-    return completer.future;
+    chrome.CreateInfo info = await chrome.sockets.tcp.create(properties);
+    await chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort);
+    chrome.sockets.tcp.setPaused(info.socketId, false);
+    clientSocketId = info.socketId;
+    HetimaChromeSocketManager.getInstance().addClient(info.socketId, this);
+    return this;
   }
 
   void close() {

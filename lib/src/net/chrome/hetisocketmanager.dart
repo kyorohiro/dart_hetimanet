@@ -1,7 +1,6 @@
 part of hetimanet.chrome;
 
 class HetimaSocketBuilderChrome extends HetimaSocketBuilder {
-
   HetimaSocket createClient() {
     return new HetimaSocketChrome.empty();
   }
@@ -14,22 +13,17 @@ class HetimaSocketBuilderChrome extends HetimaSocketBuilder {
     return new HetimaUdpSocketChrome.empty();
   }
 
-  Future<List<HetimaNetworkInterface>> getNetworkInterfaces() {
-    Completer<List<HetimaNetworkInterface>> completer = new Completer();
+  Future<List<HetimaNetworkInterface>> getNetworkInterfaces() async {
     List<HetimaNetworkInterface> interfaceList = new List();
-    chrome.system.network.getNetworkInterfaces().then((List<chrome.NetworkInterface> nl) {
-      for (chrome.NetworkInterface i in nl) {
-        HetimaNetworkInterface inter = new HetimaNetworkInterface();
-        inter.address = i.address;
-        inter.prefixLength = i.prefixLength;
-        inter.name = i.name;
-        interfaceList.add(inter);
-      }
-      completer.complete(interfaceList);
-    }).catchError((e){
-      completer.completeError(e);
-    });
-    return completer.future;
+    List<chrome.NetworkInterface> nl = await chrome.system.network.getNetworkInterfaces();
+    for (chrome.NetworkInterface i in nl) {
+      HetimaNetworkInterface inter = new HetimaNetworkInterface();
+      inter.address = i.address;
+      inter.prefixLength = i.prefixLength;
+      inter.name = i.name;
+      interfaceList.add(inter);
+    }
+    return interfaceList;
   }
 }
 
@@ -65,7 +59,7 @@ class HetimaChromeSocketManager {
 
     bool closeChecking = false;
     chrome.sockets.tcp.onReceive.listen((chrome.ReceiveInfo info) {
-     // core.print("--receive " + info.socketId.toString() + "," + info.data.getBytes().length.toString());
+      // core.print("--receive " + info.socketId.toString() + "," + info.data.getBytes().length.toString());
       HetimaSocketChrome socket = _clientList[info.socketId];
       if (socket != null) {
         socket.onReceiveInternal(info);
@@ -79,7 +73,7 @@ class HetimaChromeSocketManager {
         socket.close();
       }
     });
-    
+
     chrome.sockets.udp.onReceive.listen((chrome.ReceiveInfo info) {
       HetimaUdpSocketChrome socket = _udpList[info.socketId];
       if (socket != null) {
@@ -114,6 +108,4 @@ class HetimaChromeSocketManager {
   void removeUdp(int socketId) {
     _udpList.remove(socketId);
   }
-
 }
-

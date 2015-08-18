@@ -18,80 +18,52 @@ https://github.com/kyorohiro/HetimaPortMap
 ### UPnP Portmap
 #### create Searcher
 ```
-  hetima.UpnpDeviceSearcher.createInstance(new HetiSocketBuilderChrome()).then((UpnpDeviceSearcher deviceSearcher) {
-    print("### ok setupUpnp ${searcher}");
-  }).catchError((e) {
-    print("### error");
-  });
-```
-
-#### search Router
-```
-  deviceSearcher.searchWanPPPDevice().then((int v) {
-    if (deviceSearcher.deviceInfoList == null || deviceSearcher.deviceInfoList.length <= 0) {
-      print("not found router");
+import 'package:hetimanet/hetimanet.dart';
+import 'package:hetimanet/hetimanet_dartio.dart';
+//
+//
+main()  async {
+  HetimaSocketBuilder builder = new HetimaSocketBuilderDartIO(); 
+  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test");
+  //
+  // get network interface
+  List<HetimaNetworkInterface> interfaces = await builder.getNetworkInterfaces();
+  for (HetimaNetworkInterface i in interfaces) {
+    print("<ni>${i.address} ${i.prefixLength} ${i.name}");
+  }
+  //
+  // portmapping 
+  try {
+    StartGetExternalIp exip = await helper.startGetExternalIp(reuseRouter: true);
+    print("<exip> ${exip.externalIp}");
+  } catch (e) {
+    print("<exip ERROR> ${e}");
+  }
+  //
+  // get local ip
+  try {
+    StartGetLocalIPResult loip = await helper.startGetLocalIp();
+    for(HetimaNetworkInterface i in loip.networkInterface) {
+      print("<glip> ${i.address} ${i.name}");      
     }
-    for (hetima.UpnpDeviceInfo info in deviceSearcher.deviceInfoList) {
-      print(info.getValue(hetima.UpnpDeviceInfo.KEY_USN, "*"));
-    }
-  }).catchError((e) {
-    print("error");
-  });
-```
-
-#### request global ip
-```
-  UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
-  pppDevice.requestGetExternalIPAddress().then((UpnpGetExternalIPAddressResponse ip) {
-    print("${ip.externalIp}");
-  }).catchError((e) {
-    print("error");
-  });
-```
-
-#### request generic port mapping
-```
-  pppDevice.requestGetGenericPortMapping(newPortmappingIndex, mode).then((UpnpGetGenericPortMappingResponse r) {
-    if (r.resultCode != 200) {
-      print("failed");
-      return;
-    }
-
-    print("publicPort = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewExternalPort, "")}");
-    print("localIp = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewInternalClient, "")}");
-    print("localPort = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewInternalPort, "")}");
-    print("protocol = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewProtocol, "")}");
-    print("portMapInfo.description = ${r.getValue(hetima.UpnpGetGenericPortMappingResponse.KEY_NewPortMappingDescription, "")}");
-
-  }).catchError((e) {
-    print("error");
-  });
-```
-
-#### request add port mapping
-```
-  pppDevice.requestAddPortMapping(publicPort, "tcp", localPort, localIp, 1, "test", 0)
-  .then((hetima.UpnpAddPortMappingResponse resp) {
-    if (resp.resultCode == 200) {
-      print("ok");
-    } else {
-      print("failed");
-    }
-  }).catchError((e) {
-      print("error");
-  });
-```
-
-#### request remove port mapping
-```
-  pppDevice.requestDeletePortMapping(publicPort, "tcp")
-  .then((hetima.UpnpDeletePortMappingResponse resp) {
-    if (resp.resultCode == 200) {
-      print("ok");
-    } else {
-      print("failed");
-    }
-  }).catchError((e) {
-      print("error");
-  });
+  } catch (e) {
+    print("<glip ERROR> ${e}");
+  }
+  //
+  // start portmap
+  try {
+    StartPortMapResult sp = await helper.startPortMap();
+    print("<add> ${sp}");
+  } catch (e) {
+    print("<add ERROR> ${e}");
+  }
+  //
+  // end portmap
+  try {
+    DeleteAllPortMapResult ep = await helper.deletePortMapFromAppIdDesc();
+    print("<del> ${ep}");
+  } catch (e) {
+    print("<del ERROR> ${e}");
+  }
+}
 ```

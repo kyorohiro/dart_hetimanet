@@ -19,20 +19,16 @@ class HetimaServerSocketChrome extends HetimaServerSocket {
     HetimaChromeSocketManager.getInstance().removeServer(_mInfo);
   }
 
-  static Future<HetimaServerSocket> startServer(String address, int port) {
-    Completer<HetimaServerSocket> completer = new Completer();
-
-    chrome.sockets.tcpServer.create(new chrome.SocketProperties()).then((chrome.CreateInfo info) {
-      HetimaChromeSocketManager.getInstance();
-      return chrome.sockets.tcpServer.listen(info.socketId, address, port).then((int backlog) {
-        HetimaServerSocketChrome server = new HetimaServerSocketChrome._internal(info);
-        HetimaChromeSocketManager.getInstance().addServer(info, server);
-        completer.complete(server);
-      });
-    }).catchError((e) {
-      completer.completeError(new HetimaServerSocketError()..id=HetimaServerSocketError.ID_START);
-    });
-    return completer.future;
+  static Future<HetimaServerSocket> startServer(String address, int port) async {
+    chrome.CreateInfo info = await chrome.sockets.tcpServer.create(new chrome.SocketProperties());
+    HetimaChromeSocketManager.getInstance();
+    try {
+      await chrome.sockets.tcpServer.listen(info.socketId, address, port);
+      HetimaServerSocketChrome server = new HetimaServerSocketChrome._internal(info);
+      HetimaChromeSocketManager.getInstance().addServer(info, server);
+      return server;
+    } catch (e) {
+      throw new HetimaServerSocketError()..id = HetimaServerSocketError.ID_START;
+    }
   }
 }
-
