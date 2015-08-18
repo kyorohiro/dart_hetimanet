@@ -19,10 +19,10 @@ https://github.com/kyorohiro/HetimaPortMap
 
 ### UPnP Portmap
 * sample app 
-  example/HetimaPortMap
+  [Sample App](example/HetimaPortMap)
   https://chrome.google.com/webstore/detail/hetimaportmap/naifildeohmcocnmibaampijofhcohif
 * sample source
-  example/portmaphelper
+  [Sample Helper](example/portmaphelper)
 
 ```
 import 'package:hetimanet/hetimanet.dart';
