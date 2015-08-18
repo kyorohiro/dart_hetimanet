@@ -33,10 +33,7 @@ class UpnpDeviceInfo {
     }
   }
 
-  String get presentationURL {
-    xml.XmlDocument document = xml.parse(_serviceXml);
-    return _extractFirstValue(document.root, "presentationURL", "");
-  }
+  String get presentationURL => _extractFirstValue(xml.parse(_serviceXml).root, "presentationURL", "");
 
   @override
   String toString() {
