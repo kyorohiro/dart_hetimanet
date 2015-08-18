@@ -1,46 +1,48 @@
 import 'package:hetimanet/hetimanet.dart';
 import 'package:hetimanet/hetimanet_dartio.dart';
-
-void main() {
-  a();
-}
-
-a() async {
-  HetiSocketBuilderChrome builder = new HetiSocketBuilderChrome();
+//
+//
+main()  async {
+  HetiSocketBuilder builder = new HetiSocketBuilderDartIO(); 
+  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test");
+  //
+  // get network interface
   List<HetiNetworkInterface> interfaces = await builder.getNetworkInterfaces();
   for (HetiNetworkInterface i in interfaces) {
-    print("### ${i.address} ${i.prefixLength} ${i.name}");
+    print("<ni>${i.address} ${i.prefixLength} ${i.name}");
   }
-  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test");
-  helper.localAddress = "0.0.0.0";
+  //
+  // portmapping 
   try {
-    StartGetExternalIp exIP = await helper.startGetExternalIp(reuseRouter: true);
-    print("<exip> ${exIP.externalIp}");
+    StartGetExternalIp exip = await helper.startGetExternalIp(reuseRouter: true);
+    print("<exip> ${exip.externalIp}");
   } catch (e) {
     print("<exip ERROR> ${e}");
   }
-  
+  //
+  // get local ip
   try {
-    StartGetLocalIPResult exIP = await helper.startGetLocalIp();
-    for(HetiNetworkInterface i in exIP.networkInterface) {
+    StartGetLocalIPResult loip = await helper.startGetLocalIp();
+    for(HetiNetworkInterface i in loip.networkInterface) {
       print("<glip> ${i.address} ${i.name}");      
     }
   } catch (e) {
     print("<glip ERROR> ${e}");
   }
-  
+  //
+  // start portmap
   try {
-    StartPortMapResult exIP = await helper.startPortMap();
-    print("<add> ${exIP}");
+    StartPortMapResult sp = await helper.startPortMap();
+    print("<add> ${sp}");
   } catch (e) {
-    print("<loip ERROR> ${e}");
+    print("<add ERROR> ${e}");
   }
-  
+  //
+  // end portmap
   try {
-    DeleteAllPortMapResult exIP = await helper.deletePortMapFromAppIdDesc();
-    print("<del> ${exIP}");
+    DeleteAllPortMapResult ep = await helper.deletePortMapFromAppIdDesc();
+    print("<del> ${ep}");
   } catch (e) {
-    print("<loip ERROR> ${e}");
+    print("<del ERROR> ${e}");
   }
-
 }

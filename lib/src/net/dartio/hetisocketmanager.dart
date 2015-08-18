@@ -1,6 +1,6 @@
 part of hetimanet.dartio;
 
-class HetiSocketBuilderChrome extends HetiSocketBuilder {
+class HetiSocketBuilderDartIO extends HetiSocketBuilder {
   HetiSocket createClient() {
     return new HetiSocketDartIo();
   }

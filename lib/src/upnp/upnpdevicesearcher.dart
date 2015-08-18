@@ -79,7 +79,7 @@ class UpnpDeviceSearcher {
     return _streamer.stream;
   }
 
-  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 6]) {
+  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) {
     async.Completer completer = new async.Completer();
 
     if (_nowSearching == true) {
