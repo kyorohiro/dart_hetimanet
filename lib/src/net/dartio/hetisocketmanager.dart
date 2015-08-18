@@ -139,7 +139,7 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
   async.StreamController<HetiReceiveUdpInfo> _receiveStream = new async.StreamController.broadcast();
   
   @override
-  async.Future<int> bind(String address, int port, {bool multicast: false}) async {
+  async.Future<HetiBindResult> bind(String address, int port, {bool multicast: false}) async {
     if (_isBindingNow != false) {
       throw "now binding";
     }
@@ -158,7 +158,7 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
     } finally {
       _isBindingNow = false;
     }
-    return 0;
+    return new HetiBindResult();
   }
 
   @override
@@ -168,9 +168,7 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
   }
 
   @override
-  async.Stream<HetiReceiveUdpInfo> onReceive() {
-    return _receiveStream.stream;
-  }
+  async.Stream<HetiReceiveUdpInfo> get onReceive => _receiveStream.stream;
 
   @override
   async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) async {

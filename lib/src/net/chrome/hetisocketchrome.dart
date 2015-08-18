@@ -4,8 +4,8 @@ class HetiSocketChrome extends HetiSocket {
 
   bool _isClose = false;
   int clientSocketId;
-  async.StreamController<HetiReceiveInfo> _controllerReceive = new async.StreamController.broadcast();
-  async.StreamController<HetiCloseInfo> _controllerClose= new async.StreamController.broadcast();
+  StreamController<HetiReceiveInfo> _controllerReceive = new StreamController.broadcast();
+  StreamController<HetiCloseInfo> _controllerClose= new StreamController.broadcast();
   HetiSocketChrome.empty() {}
 
   HetiSocketChrome(int _clientSocketId) {
@@ -14,7 +14,7 @@ class HetiSocketChrome extends HetiSocket {
     clientSocketId = _clientSocketId;
   }
 
-  async.Stream<HetiReceiveInfo> onReceive() => _controllerReceive.stream;
+  Stream<HetiReceiveInfo> onReceive() => _controllerReceive.stream;
 
   void onReceiveInternal(chrome.ReceiveInfo info) {
     updateTime();
@@ -23,10 +23,10 @@ class HetiSocketChrome extends HetiSocket {
     _controllerReceive.add(new HetiReceiveInfo(info.data.getBytes()));
   }
 
-  async.Future<HetiSendInfo> send(List<int> data) {
+  Future<HetiSendInfo> send(List<int> data) {
     updateTime();
-    async.Completer<HetiSendInfo> completer = new async.Completer();
-    new async.Future.sync(() {
+    Completer<HetiSendInfo> completer = new Completer();
+    new Future.sync(() {
       chrome.ArrayBuffer buffer = new chrome.ArrayBuffer.fromBytes(data);
       return chrome.sockets.tcp.send(clientSocketId, buffer).then((chrome.SendInfo info) {
         updateTime();
@@ -38,8 +38,8 @@ class HetiSocketChrome extends HetiSocket {
     return completer.future;
   }
 
-  async.Future<HetiSocketInfo> getSocketInfo() {
-    async.Completer<HetiSocketInfo> completer = new async.Completer();
+  Future<HetiSocketInfo> getSocketInfo() {
+    Completer<HetiSocketInfo> completer = new Completer();
     
     chrome.sockets.tcp.getInfo(clientSocketId).then((chrome.SocketInfo info) {
       HetiSocketInfo ret = new HetiSocketInfo()
@@ -53,8 +53,8 @@ class HetiSocketChrome extends HetiSocket {
     });
      return completer.future;
   }
-  async.Future<HetiSocket> connect(String peerAddress, int peerPort) {
-    async.Completer<HetiSocket> completer = new async.Completer();
+  Future<HetiSocket> connect(String peerAddress, int peerPort) {
+    Completer<HetiSocket> completer = new Completer();
     chrome.SocketProperties properties = new chrome.SocketProperties();
     chrome.sockets.tcp.create(properties).then((chrome.CreateInfo info) {
       return chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort).then((int e) {
@@ -81,7 +81,7 @@ class HetiSocketChrome extends HetiSocket {
     _isClose = true;
   }
 
-  async.Stream<HetiCloseInfo> onClose() {
+  Stream<HetiCloseInfo> onClose() {
     return _controllerClose.stream;
   }
 }

@@ -1,10 +1,5 @@
 library hetimanet.chrome;
-import 'dart:typed_data' as data;
-import 'dart:math' as math;
-import 'dart:convert' as convert;
-import 'dart:async' as async;
-import 'package:hetimacore/hetimacore.dart' as heti;
-import 'package:hetimaregex/hetimaregex.dart' as hregex;
+import 'dart:async';
 import 'package:chrome/chrome_app.dart' as chrome;
 import 'hetisocket.dart';
 import 'dart:js' as js;

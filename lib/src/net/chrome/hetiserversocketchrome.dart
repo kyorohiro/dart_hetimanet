@@ -1,14 +1,14 @@
 part of hetimanet.chrome;
 
 class HetiServerSocketChrome extends HetiServerSocket {
-  async.StreamController<HetiSocket> _controller = new async.StreamController();
+  StreamController<HetiSocket> _controller = new StreamController();
   chrome.CreateInfo _mInfo = null;
 
   HetiServerSocketChrome._internal(chrome.CreateInfo info) {
     _mInfo = info;
   }
 
-  async.Stream<HetiSocket> onAccept() => _controller.stream;
+  Stream<HetiSocket> onAccept() => _controller.stream;
 
   void onAcceptInternal(chrome.AcceptInfo info) {
     _controller.add(new HetiSocketChrome(info.clientSocketId));
@@ -19,8 +19,8 @@ class HetiServerSocketChrome extends HetiServerSocket {
     HetiChromeSocketManager.getInstance().removeServer(_mInfo);
   }
 
-  static async.Future<HetiServerSocket> startServer(String address, int port) {
-    async.Completer<HetiServerSocket> completer = new async.Completer();
+  static Future<HetiServerSocket> startServer(String address, int port) {
+    Completer<HetiServerSocket> completer = new Completer();
 
     chrome.sockets.tcpServer.create(new chrome.SocketProperties()).then((chrome.CreateInfo info) {
       HetiChromeSocketManager.getInstance();

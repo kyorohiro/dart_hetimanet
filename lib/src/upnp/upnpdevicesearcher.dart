@@ -44,9 +44,9 @@ class UpnpDeviceSearcher {
     _verbose = verbose;
   }
 
-  Future<int> _initialize(String address) {
+  Future<HetiBindResult> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
-    _socket.onReceive().listen((HetiReceiveUdpInfo info) {
+    _socket.onReceive.listen((HetiReceiveUdpInfo info) {
       if (_verbose == true) {
         print("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
       }
@@ -67,12 +67,8 @@ class UpnpDeviceSearcher {
   static Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder, {String ip: "0.0.0.0", bool verbose: false}) async {
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder, verbose: verbose);
     try {
-      int v = await returnValue._initialize(ip);
-      if (v >= 0) {
-        return returnValue;
-      } else {
-        throw new UpnpDeviceSearcherException("unexpected(${v})", UpnpDeviceSearcherException.UNEXPECTED);
-      }
+      await returnValue._initialize(ip);
+      return returnValue;
     } catch (e) {
       throw new UpnpDeviceSearcherException("unexpected(${e})", UpnpDeviceSearcherException.UNEXPECTED);
     }

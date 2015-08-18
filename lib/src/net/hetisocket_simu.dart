@@ -33,7 +33,7 @@ class HetiUdpSocketSimu extends HetiUdpSocket {
   String get ip => _ip;
   int get port => _port;
 
-  Future<int> bind(String ip, int port,{bool multicast:false}) {
+  Future<HetiBindResult> bind(String ip, int port,{bool multicast:false}) {
     this._ip = ip;
     this._port = port;
     return new Future(() {
@@ -60,9 +60,7 @@ class HetiUdpSocketSimu extends HetiUdpSocket {
   }
 
   StreamController _receiveMessage = new StreamController.broadcast();
-  Stream<HetiReceiveUdpInfo> onReceive() {
-    return _receiveMessage.stream;
-  }
+  Stream<HetiReceiveUdpInfo> get onReceive => _receiveMessage.stream;
 
   Future receive(List<int> bytes, String ip, int port) {
     return new Future(() {

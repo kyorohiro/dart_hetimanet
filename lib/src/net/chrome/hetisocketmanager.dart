@@ -6,7 +6,7 @@ class HetiSocketBuilderChrome extends HetiSocketBuilder {
     return new HetiSocketChrome.empty();
   }
 
-  async.Future<HetiServerSocket> startServer(String address, int port) {
+  Future<HetiServerSocket> startServer(String address, int port) {
     return HetiServerSocketChrome.startServer(address, port);
   }
 
@@ -14,8 +14,8 @@ class HetiSocketBuilderChrome extends HetiSocketBuilder {
     return new HetiUdpSocketChrome.empty();
   }
 
-  async.Future<List<HetiNetworkInterface>> getNetworkInterfaces() {
-    async.Completer<List<HetiNetworkInterface>> completer = new async.Completer();
+  Future<List<HetiNetworkInterface>> getNetworkInterfaces() {
+    Completer<List<HetiNetworkInterface>> completer = new Completer();
     List<HetiNetworkInterface> interfaceList = new List();
     chrome.system.network.getNetworkInterfaces().then((List<chrome.NetworkInterface> nl) {
       for (chrome.NetworkInterface i in nl) {
