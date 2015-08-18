@@ -115,14 +115,10 @@ class HetiSocketDartIo extends HetiSocket {
   }
 
   @override
-  async.Stream<HetiCloseInfo> onClose() {
-    return _closeStream.stream;
-  }
+  async.Stream<HetiCloseInfo> get onClose => _closeStream.stream;
 
   @override
-  async.Stream<HetiReceiveInfo> onReceive() {
-    return _receiveStream.stream;
-  }
+  async.Stream<HetiReceiveInfo> get onReceive => _receiveStream.stream;
 
   @override
   async.Future<HetiSendInfo> send(List<int> data) async {

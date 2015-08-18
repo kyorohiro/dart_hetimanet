@@ -82,7 +82,7 @@ class HetiHttpClient {
     }
     builder.appendString("\r\n");
 
-    socket.onReceive().listen((HetiReceiveInfo info) {
+    socket.onReceive.listen((HetiReceiveInfo info) {
       if(_verbose == true) {
         print("<hetihttpclient f=onReceive> Length${path}:${info.data.length} ${convert.UTF8.decode(info.data)}</hetihttpclient>");
       }
@@ -125,7 +125,7 @@ class HetiHttpClient {
       });
     });
     //
-    socket.onReceive().listen((HetiReceiveInfo info) {});
+    socket.onReceive.listen((HetiReceiveInfo info) {});
     socket.send(builder.toList()).then((HetiSendInfo info) {});
 
     handleResponse(completer);
@@ -164,7 +164,7 @@ class HetiHttpClient {
       });
     });
     //
-    socket.onReceive().listen((HetiReceiveInfo info) {});
+    socket.onReceive.listen((HetiReceiveInfo info) {});
     socket.send(builder.toList()).then((HetiSendInfo info) {});
 
     handleResponse(completer);

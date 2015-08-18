@@ -14,7 +14,7 @@ class HetiSocketChrome extends HetiSocket {
     clientSocketId = _clientSocketId;
   }
 
-  Stream<HetiReceiveInfo> onReceive() => _controllerReceive.stream;
+  Stream<HetiReceiveInfo> get onReceive => _controllerReceive.stream;
 
   void onReceiveInternal(chrome.ReceiveInfo info) {
     updateTime();
@@ -81,7 +81,5 @@ class HetiSocketChrome extends HetiSocket {
     _isClose = true;
   }
 
-  Stream<HetiCloseInfo> onClose() {
-    return _controllerClose.stream;
-  }
+  Stream<HetiCloseInfo> get onClose => _controllerClose.stream;
 }

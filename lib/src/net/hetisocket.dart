@@ -28,8 +28,8 @@ abstract class HetiSocket {
   async.Future<HetiSocket> connect(String peerAddress, int peerPort) ;
   async.Future<HetiSendInfo> send(List<int> data);
   async.Future<HetiSocketInfo> getSocketInfo();
-  async.Stream<HetiReceiveInfo> onReceive();
-  async.Stream<HetiCloseInfo> onClose();
+  async.Stream<HetiReceiveInfo> onReceive;
+  async.Stream<HetiCloseInfo> onClose;
   bool isClosed = false;
   void close() {
     buffer.immutable = true;
@@ -55,6 +55,7 @@ abstract class HetiUdpSocket {
 class HetiBindResult {
   
 }
+
 class HetiNetworkInterface
 {
   String address;
