@@ -24,6 +24,13 @@ class UpnpDeviceInfo {
   List<UpnpDeviceServiceInfo> _serviceList = [];
   HetiSocketBuilder socketBuilder;
 
+  List<UpnpDeviceServiceInfo> get serviceList => _serviceList;
+  String _urlBase = "";
+  String get urlBase => _urlBase;
+  String _serviceXml = "";
+
+  String get presentationURL => _extractFirstValue(xml.parse(_serviceXml).root, "presentationURL", "");
+
   UpnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetiSocketBuilder builder) {
     socketBuilder = builder;
     for (HetiHttpResponseHeaderField header in headerField) {
@@ -32,8 +39,6 @@ class UpnpDeviceInfo {
       }
     }
   }
-
-  String get presentationURL => _extractFirstValue(xml.parse(_serviceXml).root, "presentationURL", "");
 
   @override
   String toString() {
@@ -88,40 +93,6 @@ class UpnpDeviceInfo {
     return true;
   }
 
-  List<UpnpDeviceServiceInfo> get serviceList => _serviceList;
-  String URLBase = "";
-
-  void _updateServiceXml() {
-    _serviceList.clear();
-    try {
-      xml.XmlDocument document = xml.parse(_serviceXml);
-
-      //print("########_serviceXml===${_serviceXml}########");
-      URLBase = _extractFirstValue(document.rootElement, "URLBase", "");
-      Iterable<xml.XmlElement> elements = document.findAllElements("service");
-      for (xml.XmlElement element in elements) {
-        UpnpDeviceServiceInfo info = new UpnpDeviceServiceInfo();
-        info.controlURL = _extractFirstValue(element, "controlURL", "");
-        info.eventSubURL = _extractFirstValue(element, "eventSubURL", "");
-        info.SCPDURL = _extractFirstValue(element, "SCPDURL", "");
-        info.serviceType = _extractFirstValue(element, "serviceType", "");
-        info.serviceId = _extractFirstValue(element, "serviceId", "");
-        _serviceList.add(info);
-      }
-    } catch (e) {
-      print("xml parse error: ${_serviceXml}");
-    }
-  }
-
-  String _extractFirstValue(xml.XmlElement element, String key, String defaultValue) {
-    Iterable<xml.XmlElement> elements = element.findAllElements(key);
-    if (elements == null || elements.length == 0 || null == elements.first || elements.first.text == null) {
-      return defaultValue;
-    }
-
-    return elements.first.text;
-  }
-  String _serviceXml = "";
 
   Future<int> extractService() async {
     _serviceXml = await requestServiceList();
@@ -143,7 +114,39 @@ class UpnpDeviceInfo {
     await res.body.rawcompleterFin.future;
     int length = await res.body.getLength();
     List<int> v = await res.body.getByteFuture(0, length);
-    return convert.UTF8.decode(v);
+    return convert.UTF8.decode(v, allowMalformed:true);
+  }
+
+  String _extractFirstValue(xml.XmlElement element, String key, String defaultValue) {
+    Iterable<xml.XmlElement> elements = element.findAllElements(key);
+    if (elements == null || elements.length == 0 || null == elements.first || elements.first.text == null) {
+      return defaultValue;
+    }
+
+    return elements.first.text;
+  }
+
+
+  void _updateServiceXml() {
+    _serviceList.clear();
+    try {
+      xml.XmlDocument document = xml.parse(_serviceXml);
+
+      //print("########_serviceXml===${_serviceXml}########");
+      _urlBase = _extractFirstValue(document.rootElement, "URLBase", "");
+      Iterable<xml.XmlElement> elements = document.findAllElements("service");
+      for (xml.XmlElement element in elements) {
+        UpnpDeviceServiceInfo info = new UpnpDeviceServiceInfo();
+        info.controlURL = _extractFirstValue(element, "controlURL", "");
+        info.eventSubURL = _extractFirstValue(element, "eventSubURL", "");
+        info.SCPDURL = _extractFirstValue(element, "SCPDURL", "");
+        info.serviceType = _extractFirstValue(element, "serviceType", "");
+        info.serviceId = _extractFirstValue(element, "serviceId", "");
+        _serviceList.add(info);
+      }
+    } catch (e) {
+      print("xml parse error: ${_serviceXml}");
+    }
   }
 }
 

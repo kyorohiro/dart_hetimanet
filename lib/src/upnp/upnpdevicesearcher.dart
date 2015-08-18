@@ -32,33 +32,6 @@ class UpnpDeviceSearcher {
       """ST: urn:schemas-upnp-org:service:WANIPConnection:2\r\n""" +
       """\r\n""";
 
-  List<UpnpDeviceInfo> deviceInfoList = new List();
-  HetiUdpSocket _socket = null;
-  StreamController<UpnpDeviceInfo> _streamer = new StreamController.broadcast();
-  HetiSocketBuilder _socketBuilder = null;
-  bool _nowSearching = false;
-
-  bool _verbose = false;
-  UpnpDeviceSearcher._fromSocketBuilder(HetiSocketBuilder builder, {bool verbose: false}) {
-    _socketBuilder = builder;
-    _verbose = verbose;
-  }
-
-  Future<HetiBindResult> _initialize(String address) {
-    _socket = _socketBuilder.createUdpClient();
-    _socket.onReceive.listen((HetiReceiveUdpInfo info) {
-      if (_verbose == true) {
-        print("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
-      }
-      extractDeviceInfoFromUdpResponse(info.data);
-    });
-    return _socket.bind(address, 0, multicast: true);
-  }
-
-  bool get nowSearching => _nowSearching;
-
-  Future<int> close() => _socket.close();
-
   static Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder, {String ip: "0.0.0.0", bool verbose: false}) async {
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder, verbose: verbose);
     try {
@@ -69,7 +42,21 @@ class UpnpDeviceSearcher {
     }
   }
 
+  HetiSocketBuilder _socketBuilder = null;
+  HetiUdpSocket _socket = null;
+  StreamController<UpnpDeviceInfo> _streamer = new StreamController.broadcast();
   Stream<UpnpDeviceInfo> get onReceive => _streamer.stream;
+  List<UpnpDeviceInfo> deviceInfoList = new List();
+  bool _nowSearching = false;
+  bool get nowSearching => _nowSearching;
+  bool _verbose = false;
+
+  UpnpDeviceSearcher._fromSocketBuilder(HetiSocketBuilder builder, {bool verbose: false}) {
+    _socketBuilder = builder;
+    _verbose = verbose;
+  }
+
+  Future<int> close() => _socket.close();
 
   Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) async {
     if (_nowSearching == true) {
@@ -106,6 +93,18 @@ class UpnpDeviceSearcher {
       _streamer.add(info);
     }
   }
+
+  Future<HetiBindResult> _initialize(String address) {
+    _socket = _socketBuilder.createUdpClient();
+    _socket.onReceive.listen((HetiReceiveUdpInfo info) {
+      if (_verbose == true) {
+        print("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
+      }
+      extractDeviceInfoFromUdpResponse(info.data);
+    });
+    return _socket.bind(address, 0, multicast: true);
+  }
+
 }
 
 class UpnpDeviceSearcherException extends StateError {

@@ -135,7 +135,7 @@ class UpnpPPPDevice {
     String host = url.host;
     String path = "/";
     int port = url.port;
-    if (_base.URLBase != null && _base.URLBase.length != 0) {
+    if (_base.urlBase != null && _base.urlBase.length != 0) {
       HttpUrl urlBase = HttpUrlDecoder.decodeUrl(location);
       host = urlBase.host;
       path = urlBase.path;
