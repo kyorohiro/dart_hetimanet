@@ -32,9 +32,11 @@ class HetiHttpClient {
   String host;
   int port;
 
+  bool _verbose = false;
   //, [HetimaDataBuilder b]
-  HetiHttpClient(HetiSocketBuilder socketBuilder, [HetimaDataBuilder dataBuilder=null]) {
+  HetiHttpClient(HetiSocketBuilder socketBuilder, {HetimaDataBuilder dataBuilder:null, bool verbose:false}) {
     _socketBuilder = socketBuilder;
+    _verbose = verbose;
   }
 
   async.Future<HetiHttpClientConnectResult> connect(String _host, int _port) {
@@ -46,7 +48,9 @@ class HetiHttpClient {
       completer.completeError(new Exception(""));
       return completer.future;
     }
-    //print("###connet ${socket}");
+    if(_verbose == true) {
+      print("<hetihttpclient f=connect> ${socket}");
+    }
     socket.connect(host, port).then((HetiSocket socket) {
       if (socket == null) {
         completer.completeError(new Exception(""));
@@ -79,7 +83,9 @@ class HetiHttpClient {
     builder.appendString("\r\n");
 
     socket.onReceive().listen((HetiReceiveInfo info) {
-      //print("Length" + path + ":" + info.data.length.toString());
+      if(_verbose == true) {
+        print("<hetihttpclient f=onReceive> Length${path}:${info.data.length} ${convert.UTF8.decode(info.data)}</hetihttpclient>");
+      }
     });
     socket.send(builder.toList()).then((HetiSendInfo info) {});
 
@@ -181,12 +187,16 @@ class HetiHttpClient {
       if (transferEncodingField == null || transferEncodingField.fieldValue != "chunked") {
         result.body = new HetimaReaderAdapter(socket.buffer, message.index);
         if (result.message.contentLength > 0) {
-          result.body.getByteFuture(message.index + result.message.contentLength - 1, 1).then((e) {
-           // print("-------------------- immutable =true;");
+          result.body.getByteFuture(0, result.message.contentLength).then((e) {
+            if(_verbose == true) {
+               print("-------------------- immutable =true;[B] ${result.message.contentLength} ${message.index}");
+            }
             result.body.immutable = true;
           });
         } else {
-          //print("-------------------- immutable =true;");
+          if(_verbose == true) {
+              print("-------------------- immutable =true; [A}");
+           }
           result.body.immutable = true;
         }
       } else {

@@ -8,7 +8,7 @@ import '../util/hetiutil.dart';
 import 'package:xml/xml.dart' as xml;
 export 'upnpdeviceinfo.dart';
 export 'upnpdevicesearcher.dart';
-export  'upnppppdevice.dart';
+export 'upnppppdevice.dart';
 
 class UpnpDeviceInfo {
   static final String KEY_ST = "ST";
@@ -40,16 +40,16 @@ class UpnpDeviceInfo {
 
   @override
   String toString() {
-     StringBuffer buffer = new StringBuffer();
-     buffer.write("#header;\r\n");
-     for(String key in _headerMap.keys) {
-       buffer.write("__"+key+":"+_headerMap[key]+";\r\n");
-     }
-     buffer.write("#service;\r\n");
-     for(UpnpDeviceServiceInfo service in _serviceList) {
-       buffer.write("__"+service.serviceId+";\r\n");       
-     }
-     return buffer.toString();
+    StringBuffer buffer = new StringBuffer();
+    buffer.write("#header;\r\n");
+    for (String key in _headerMap.keys) {
+      buffer.write("__" + key + ":" + _headerMap[key] + ";\r\n");
+    }
+    buffer.write("#service;\r\n");
+    for (UpnpDeviceServiceInfo service in _serviceList) {
+      buffer.write("__" + service.serviceId + ";\r\n");
+    }
+    return buffer.toString();
   }
 
   HetiSocketBuilder getSocketBuilder() {
@@ -91,33 +91,37 @@ class UpnpDeviceInfo {
     return true;
   }
 
-
   List<UpnpDeviceServiceInfo> get serviceList => _serviceList;
   String URLBase = "";
 
   void _updateServiceXml() {
     _serviceList.clear();
-    xml.XmlDocument document = xml.parse(_serviceXml);
-    //print("########_serviceXml===${_serviceXml}########");
-    URLBase = _extractFirstValue(document.rootElement, "URLBase", "");
-    Iterable<xml.XmlElement> elements = document.findAllElements("service");
-    for (xml.XmlElement element in elements) {
-      UpnpDeviceServiceInfo info = new UpnpDeviceServiceInfo();
-      info.controlURL = _extractFirstValue(element, "controlURL", "");
-      info.eventSubURL = _extractFirstValue(element, "eventSubURL", "");
-      info.SCPDURL = _extractFirstValue(element, "SCPDURL", "");
-      info.serviceType = _extractFirstValue(element, "serviceType", "");
-      info.serviceId = _extractFirstValue(element, "serviceId", "");
-      _serviceList.add(info);
+    try {
+      xml.XmlDocument document = xml.parse(_serviceXml);
+
+      //print("########_serviceXml===${_serviceXml}########");
+      URLBase = _extractFirstValue(document.rootElement, "URLBase", "");
+      Iterable<xml.XmlElement> elements = document.findAllElements("service");
+      for (xml.XmlElement element in elements) {
+        UpnpDeviceServiceInfo info = new UpnpDeviceServiceInfo();
+        info.controlURL = _extractFirstValue(element, "controlURL", "");
+        info.eventSubURL = _extractFirstValue(element, "eventSubURL", "");
+        info.SCPDURL = _extractFirstValue(element, "SCPDURL", "");
+        info.serviceType = _extractFirstValue(element, "serviceType", "");
+        info.serviceId = _extractFirstValue(element, "serviceId", "");
+        _serviceList.add(info);
+      }
+    } catch (e) {
+      print("xml parse error: ${_serviceXml}");
     }
   }
 
   String _extractFirstValue(xml.XmlElement element, String key, String defaultValue) {
     Iterable<xml.XmlElement> elements = element.findAllElements(key);
-    if(elements == null ||elements.length == 0 || null == elements.first || elements.first.text == null) {
+    if (elements == null || elements.length == 0 || null == elements.first || elements.first.text == null) {
       return defaultValue;
-    } 
-    
+    }
+
     return elements.first.text;
   }
   String _serviceXml = "";
@@ -145,7 +149,7 @@ class UpnpDeviceInfo {
     }
 
     //print("-----requestServiceList()");
-    HetiHttpClient client = new HetiHttpClient(socketBuilder);
+    HetiHttpClient client = new HetiHttpClient(socketBuilder, verbose:true);
     HttpUrl url = HttpUrlDecoder.decodeUrl(location);
     client.connect(url.host, url.port).then((HetiHttpClientConnectResult d) {
       //print("-----connected[1]");
@@ -153,44 +157,40 @@ class UpnpDeviceInfo {
     }).then((HetiHttpClientResponse res) {
       //print("-----get[2] ");
       //HetiHttpResponseHeaderField field = res.message.find(RfcTable.HEADER_FIELD_CONTENT_LENGTH);
-      return new async.Future.delayed(new Duration(seconds:1)).then((_){
-      //
-      //
-      print("-----get[2-0] ${res.body.immutable}");
-      //print("S1 ${res.body.rawcompleterFin.isCompleted}");
-      //return res.body.onFin().then((b) {
-      return res.body.rawcompleterFin.future.then((b){
-        print("-----get[2-1]");
-        return res.body.getLength().then((int length) {
-          //print("-----get[2-2]");
-          return res.body.getByteFuture(0, length).then((List<int> v) {
-            //print("-----get[2-3]");
-            completer.complete(convert.UTF8.decode(v));
+      return new async.Future.delayed(new Duration(seconds: 1)).then((_) {
+        //
+        //
+        print("-----get[2-0] ${res.body.immutable}");
+        //print("S1 ${res.body.rawcompleterFin.isCompleted}");
+        //return res.body.onFin().then((b) {
+        return res.body.rawcompleterFin.future.then((b) {
+          print("-----get[2-1]");
+          return res.body.getLength().then((int length) {
+            //print("-----get[2-2]");
+            return res.body.getByteFuture(0, length).then((List<int> v) {
+              print("-----get[2-3] ${v.length} ${length} ${client.socket.buffer.size()}");
+              completer.complete(convert.UTF8.decode(v));
+            });
           });
+        }).catchError((e) {
+          print("-----error[2-3]");
+          throw e;
         });
-      }).catchError((e){
-        //print("-----error[2-3]");
-        throw e;
+        //print("S2 ${res.body.rawcompleterFin.isCompleted}");
+        // print("S2${res.body.completerFin.isCompleted}");
+        //
+        //
       });
-      //print("S2 ${res.body.rawcompleterFin.isCompleted}");
-     // print("S2${res.body.completerFin.isCompleted}");
-      //
-      //
-      });
-
     }).catchError((e) {
-     // print("-----error[3]");
+      // print("-----error[3]");
 
       completer.completeError(e);
     });
     return completer.future;
   }
-
 }
 
-
-class UpnpDeviceServiceInfo 
-{
+class UpnpDeviceServiceInfo {
   String serviceType = "";
   String serviceId = "";
   String controlURL = "";

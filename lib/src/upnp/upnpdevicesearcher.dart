@@ -99,7 +99,9 @@ class UpnpDeviceSearcher {
 
     new Future.delayed(new Duration(seconds: (timeoutSec)), () {
       _nowSearching = false;
-      completer.complete({});
+      if(completer.isCompleted == false) {
+        completer.complete({});
+      }
     });
 
     _nowSearching = true;
