@@ -96,21 +96,18 @@ class UpnpDeviceSearcher {
     });
   }
 
-  void extractDeviceInfoFromUdpResponse(List<int> buffer) {
+  extractDeviceInfoFromUdpResponse(List<int> buffer) async {
     ArrayBuilder builder = new ArrayBuilder();
     EasyParser parser = new EasyParser(builder);
     builder.appendIntList(buffer, 0, buffer.length);
-    HetiHttpResponse.decodeHttpMessage(parser).then((HetiHttpMessageWithoutBody message) {
-      UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
-      if (!deviceInfoList.contains(info)) {
-        info.extractService().then((int v) {
-          if (!deviceInfoList.contains(info)) {
-            deviceInfoList.add(info);
-            _streamer.add(info);
-          }
-        }).catchError((e) {});
-      }
-    });
+    HetiHttpMessageWithoutBody message = await HetiHttpResponse.decodeHttpMessage(parser);
+    UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
+
+    if (!deviceInfoList.contains(info)) {
+      await info.extractService();
+      deviceInfoList.add(info);
+      _streamer.add(info);
+    }
   }
 }
 
