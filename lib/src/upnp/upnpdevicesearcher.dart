@@ -59,9 +59,6 @@ class UpnpDeviceSearcher {
 
   Future<int> close() => _socket.close();
 
-  /**
-   * create UPnPDeviceSearcher Object.
-   */
   static Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder, {String ip: "0.0.0.0", bool verbose: false}) async {
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder, verbose: verbose);
     try {

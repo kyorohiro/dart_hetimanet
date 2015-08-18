@@ -135,10 +135,10 @@ class UpnpDeviceInfo {
   Future<String> requestServiceList() async {
     String location = getValue(UpnpDeviceInfo.KEY_LOCATION, "");
     if (location == "" || location == null) {
-      throw {"message":"invalid location"};
+      throw {"message": "invalid location"};
     }
 
-    HetiHttpClient client = new HetiHttpClient(socketBuilder, verbose:true);
+    HetiHttpClient client = new HetiHttpClient(socketBuilder, verbose: true);
     HttpUrl url = HttpUrlDecoder.decodeUrl(location);
     await client.connect(url.host, url.port);
     HetiHttpClientResponse res = await client.get(url.path);
