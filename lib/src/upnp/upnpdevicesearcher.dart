@@ -1,7 +1,7 @@
 library hetimanet.upnp.searcher;
 
 import 'dart:convert' as convert;
-import 'dart:async' as async;
+import 'dart:async';
 import 'package:hetimacore/hetimacore.dart';
 import '../net/hetisocket.dart';
 import '../http/hetihttp.dart';
@@ -34,53 +34,56 @@ class UpnpDeviceSearcher {
 
   List<UpnpDeviceInfo> deviceInfoList = new List();
   HetiUdpSocket _socket = null;
-  async.StreamController<UpnpDeviceInfo> _streamer = new async.StreamController.broadcast();
+  StreamController<UpnpDeviceInfo> _streamer = new StreamController.broadcast();
   HetiSocketBuilder _socketBuilder = null;
   bool _nowSearching = false;
 
-  UpnpDeviceSearcher._fromSocketBuilder(HetiSocketBuilder builder) {
+  bool _verbose = false;
+  UpnpDeviceSearcher._fromSocketBuilder(HetiSocketBuilder builder, {bool verbose: false}) {
     _socketBuilder = builder;
+    _verbose = verbose;
   }
 
-  async.Future<int> _initialize(String address) {
+  Future<int> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
     _socket.onReceive().listen((HetiReceiveUdpInfo info) {
-     // print("+++++++" + convert.UTF8.decode(info.data)+"+++++++");
+      if (_verbose == true) {
+        print("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
+      }
       extractDeviceInfoFromUdpResponse(info.data);
     });
-    return _socket.bind(address, 0, multicast:true);
+    return _socket.bind(address, 0, multicast: true);
   }
 
   bool get nowSearching => _nowSearching;
 
-  async.Future<int> close() {
+  Future<int> close() {
     return _socket.close();
   }
 
   /**
    * create UPnPDeviceSearcher Object.
    */
-  static async.Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder,{String ip:"0.0.0.0"}) {
-    async.Completer<UpnpDeviceSearcher> completer = new async.Completer();
-    UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder);
-    returnValue._initialize(ip).then((int v) {
+  static Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder, {String ip: "0.0.0.0", bool verbose: false}) async {
+    UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder, verbose: verbose);
+    try {
+      int v = await returnValue._initialize(ip);
       if (v >= 0) {
-        completer.complete(returnValue);
+        return returnValue;
       } else {
-        completer.completeError(new UpnpDeviceSearcherException("unexpected(${v})", UpnpDeviceSearcherException.UNEXPECTED));
+        throw new UpnpDeviceSearcherException("unexpected(${v})", UpnpDeviceSearcherException.UNEXPECTED);
       }
-    }).catchError((e) {
-      completer.completeError(new UpnpDeviceSearcherException("unexpected(${e})", UpnpDeviceSearcherException.UNEXPECTED));
-    });
-    return completer.future;
+    } catch (e) {
+      throw new UpnpDeviceSearcherException("unexpected(${e})", UpnpDeviceSearcherException.UNEXPECTED);
+    }
   }
 
-  async.Stream<UpnpDeviceInfo> onReceive() {
+  Stream<UpnpDeviceInfo> onReceive() {
     return _streamer.stream;
   }
 
-  async.Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) {
-    async.Completer completer = new async.Completer();
+  Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) {
+    Completer completer = new Completer();
 
     if (_nowSearching == true) {
       completer.completeError(new UpnpDeviceSearcherException("already run", UpnpDeviceSearcherException.ALREADY_RUN));
@@ -98,7 +101,7 @@ class UpnpDeviceSearcher {
       completer.completeError(new UpnpDeviceSearcherException("failed search", UpnpDeviceSearcherException.FAILED_SEARCH));
     });
 
-    new async.Future.delayed(new Duration(seconds: (timeoutSec)), () {
+    new Future.delayed(new Duration(seconds: (timeoutSec)), () {
       _nowSearching = false;
       completer.complete({});
     });
@@ -112,7 +115,6 @@ class UpnpDeviceSearcher {
     EasyParser parser = new EasyParser(builder);
     builder.appendIntList(buffer, 0, buffer.length);
     HetiHttpResponse.decodeHttpMessage(parser).then((HetiHttpMessageWithoutBody message) {
-
       UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
       if (!deviceInfoList.contains(info)) {
         info.extractService().then((int v) {
