@@ -2,7 +2,7 @@ part of hetimanet.chrome;
 
 class HetiUdpSocketChrome extends HetiUdpSocket {
   chrome.CreateInfo _info = null;
-  StreamController<HetiReceiveUdpInfo> receiveStream = new StreamController();
+  StreamController<HetiReceiveUdpInfo> _receiveStream = new StreamController();
   HetiUdpSocketChrome.empty() {}
 
   Future<HetiBindResult> bind(String address, int port, {bool multicast: false}) async {
@@ -25,7 +25,7 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
     js.JsObject s = info.toJs();
     String remoteAddress = s["remoteAddress"];
     int remotePort = s["remotePort"];
-    receiveStream.add(new HetiReceiveUdpInfo(info.data.getBytes(), remoteAddress, remotePort));
+    _receiveStream.add(new HetiReceiveUdpInfo(info.data.getBytes(), remoteAddress, remotePort));
   }
 
   Future close() {
@@ -33,7 +33,7 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
     return chrome.sockets.udp.close(_info.socketId);
   }
 
-  Stream<HetiReceiveUdpInfo> get onReceive => receiveStream.stream;
+  Stream<HetiReceiveUdpInfo> get onReceive => _receiveStream.stream;
 
   Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) async {
     chrome.SendInfo info = await chrome.sockets.udp.send(_info.socketId, new chrome.ArrayBuffer.fromBytes(buffer), address, port);
