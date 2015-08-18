@@ -9,7 +9,7 @@ import 'dart:html' as html;
 import 'dart:async' as async;
 
 void main() {
-  HetiSocketBuilder builder = new HetiSocketBuilderChrome();
+  HetimaSocketBuilder builder = new HetimaSocketBuilderChrome();
   HetiHttpServerHelper server = new HetiHttpServerHelper(builder);
   server.basePort = 8081;
   server.numOfRetry = 0;
@@ -22,7 +22,7 @@ void main() {
 
   server.onResponse.listen((HetiHttpServerPlusResponseItem item) {
     print("==${item.path}==${item.option}");
-    item.socket.getSocketInfo().then((HetiSocketInfo info) {
+    item.socket.getSocketInfo().then((HetimaSocketInfo info) {
       print("--");
       print("peer  : ${info.peerAddress} ${info.peerPort}");
       print("local : ${info.localAddress} ${info.localPort}");

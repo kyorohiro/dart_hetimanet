@@ -1,21 +1,21 @@
 part of hetimanet.chrome;
 
-class HetiUdpSocketChrome extends HetiUdpSocket {
+class HetimaUdpSocketChrome extends HetimaUdpSocket {
   chrome.CreateInfo _info = null;
-  StreamController<HetiReceiveUdpInfo> _receiveStream = new StreamController();
-  HetiUdpSocketChrome.empty() {}
+  StreamController<HetimaReceiveUdpInfo> _receiveStream = new StreamController();
+  HetimaUdpSocketChrome.empty() {}
 
-  Future<HetiBindResult> bind(String address, int port, {bool multicast: false}) async {
+  Future<HetimaBindResult> bind(String address, int port, {bool multicast: false}) async {
     chrome.SocketProperties properties = new chrome.SocketProperties();
     chrome.CreateInfo info = _info = await chrome.sockets.udp.create(properties);
 
-    HetiChromeSocketManager.getInstance().addUdp(info.socketId, this);
+    HetimaChromeSocketManager.getInstance().addUdp(info.socketId, this);
     await chrome.sockets.udp.setMulticastLoopbackMode(_info.socketId, multicast);
     int v = await chrome.sockets.udp.bind(_info.socketId, address, port);
     if (v < 0) {
       throw {"resultCode": v};
     }
-    return new HetiBindResult();
+    return new HetimaBindResult();
   }
 
   void onReceiveInternal(chrome.ReceiveInfo info) {
@@ -25,21 +25,21 @@ class HetiUdpSocketChrome extends HetiUdpSocket {
     js.JsObject s = info.toJs();
     String remoteAddress = s["remoteAddress"];
     int remotePort = s["remotePort"];
-    _receiveStream.add(new HetiReceiveUdpInfo(info.data.getBytes(), remoteAddress, remotePort));
+    _receiveStream.add(new HetimaReceiveUdpInfo(info.data.getBytes(), remoteAddress, remotePort));
   }
 
   Future close() {
-    HetiChromeSocketManager.getInstance().removeUdp(_info.socketId);
+    HetimaChromeSocketManager.getInstance().removeUdp(_info.socketId);
     return chrome.sockets.udp.close(_info.socketId);
   }
 
-  Stream<HetiReceiveUdpInfo> get onReceive => _receiveStream.stream;
+  Stream<HetimaReceiveUdpInfo> get onReceive => _receiveStream.stream;
 
-  Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) async {
+  Future<HetimaUdpSendInfo> send(List<int> buffer, String address, int port) async {
     chrome.SendInfo info = await chrome.sockets.udp.send(_info.socketId, new chrome.ArrayBuffer.fromBytes(buffer), address, port);
     if (info.resultCode < 0) {
       throw {"resultCode": info.resultCode};
     }
-    return new HetiUdpSendInfo(info.resultCode);
+    return new HetimaUdpSendInfo(info.resultCode);
   }
 }

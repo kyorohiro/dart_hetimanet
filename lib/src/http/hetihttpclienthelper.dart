@@ -13,12 +13,12 @@ import 'hetihttpclient.dart';
 class HetiHttpClientHelper {
   String _address;
   int _port;
-  HetiSocketBuilder _socketBuilder;
+  HetimaSocketBuilder _socketBuilder;
   HetimaDataBuilder _fileBuilder;
   String get address => _address;
   int get port => _port;
 
-  HetiHttpClientHelper(String address, int port, HetiSocketBuilder socketBuilder, HetimaDataBuilder fileBuilder) {
+  HetiHttpClientHelper(String address, int port, HetimaSocketBuilder socketBuilder, HetimaDataBuilder fileBuilder) {
     this._address = address;
     this._port = port;
     this._socketBuilder = socketBuilder;

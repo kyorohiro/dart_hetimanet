@@ -32,7 +32,7 @@ class UpnpDeviceSearcher {
       """ST: urn:schemas-upnp-org:service:WANIPConnection:2\r\n""" +
       """\r\n""";
 
-  static Future<UpnpDeviceSearcher> createInstance(HetiSocketBuilder builder, {String ip: "0.0.0.0", bool verbose: false}) async {
+  static Future<UpnpDeviceSearcher> createInstance(HetimaSocketBuilder builder, {String ip: "0.0.0.0", bool verbose: false}) async {
     UpnpDeviceSearcher returnValue = new UpnpDeviceSearcher._fromSocketBuilder(builder, verbose: verbose);
     try {
       await returnValue._initialize(ip);
@@ -42,8 +42,8 @@ class UpnpDeviceSearcher {
     }
   }
 
-  HetiSocketBuilder _socketBuilder = null;
-  HetiUdpSocket _socket = null;
+  HetimaSocketBuilder _socketBuilder = null;
+  HetimaUdpSocket _socket = null;
   StreamController<UpnpDeviceInfo> _streamer = new StreamController.broadcast();
   Stream<UpnpDeviceInfo> get onReceive => _streamer.stream;
   List<UpnpDeviceInfo> deviceInfoList = new List();
@@ -51,7 +51,7 @@ class UpnpDeviceSearcher {
   bool get nowSearching => _nowSearching;
   bool _verbose = false;
 
-  UpnpDeviceSearcher._fromSocketBuilder(HetiSocketBuilder builder, {bool verbose: false}) {
+  UpnpDeviceSearcher._fromSocketBuilder(HetimaSocketBuilder builder, {bool verbose: false}) {
     _socketBuilder = builder;
     _verbose = verbose;
   }
@@ -94,9 +94,9 @@ class UpnpDeviceSearcher {
     }
   }
 
-  Future<HetiBindResult> _initialize(String address) {
+  Future<HetimaBindResult> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
-    _socket.onReceive.listen((HetiReceiveUdpInfo info) {
+    _socket.onReceive.listen((HetimaReceiveUdpInfo info) {
       if (_verbose == true) {
         print("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
       }

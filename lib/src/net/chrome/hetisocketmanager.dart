@@ -1,25 +1,25 @@
 part of hetimanet.chrome;
 
-class HetiSocketBuilderChrome extends HetiSocketBuilder {
+class HetimaSocketBuilderChrome extends HetimaSocketBuilder {
 
-  HetiSocket createClient() {
-    return new HetiSocketChrome.empty();
+  HetimaSocket createClient() {
+    return new HetimaSocketChrome.empty();
   }
 
-  Future<HetiServerSocket> startServer(String address, int port) {
-    return HetiServerSocketChrome.startServer(address, port);
+  Future<HetimaServerSocket> startServer(String address, int port) {
+    return HetimaServerSocketChrome.startServer(address, port);
   }
 
-  HetiUdpSocket createUdpClient() {
-    return new HetiUdpSocketChrome.empty();
+  HetimaUdpSocket createUdpClient() {
+    return new HetimaUdpSocketChrome.empty();
   }
 
-  Future<List<HetiNetworkInterface>> getNetworkInterfaces() {
-    Completer<List<HetiNetworkInterface>> completer = new Completer();
-    List<HetiNetworkInterface> interfaceList = new List();
+  Future<List<HetimaNetworkInterface>> getNetworkInterfaces() {
+    Completer<List<HetimaNetworkInterface>> completer = new Completer();
+    List<HetimaNetworkInterface> interfaceList = new List();
     chrome.system.network.getNetworkInterfaces().then((List<chrome.NetworkInterface> nl) {
       for (chrome.NetworkInterface i in nl) {
-        HetiNetworkInterface inter = new HetiNetworkInterface();
+        HetimaNetworkInterface inter = new HetimaNetworkInterface();
         inter.address = i.address;
         inter.prefixLength = i.prefixLength;
         inter.name = i.name;
@@ -33,27 +33,27 @@ class HetiSocketBuilderChrome extends HetiSocketBuilder {
   }
 }
 
-class HetiChromeSocketManager {
-  Map<int, HetiServerSocket> _serverList = new Map();
-  Map<int, HetiSocket> _clientList = new Map();
-  Map<int, HetiUdpSocket> _udpList = new Map();
-  static final HetiChromeSocketManager _instance = new HetiChromeSocketManager._internal();
-  factory HetiChromeSocketManager() {
+class HetimaChromeSocketManager {
+  Map<int, HetimaServerSocket> _serverList = new Map();
+  Map<int, HetimaSocket> _clientList = new Map();
+  Map<int, HetimaUdpSocket> _udpList = new Map();
+  static final HetimaChromeSocketManager _instance = new HetimaChromeSocketManager._internal();
+  factory HetimaChromeSocketManager() {
     return _instance;
   }
 
-  HetiChromeSocketManager._internal() {
+  HetimaChromeSocketManager._internal() {
     manageServerSocket();
   }
 
-  static HetiChromeSocketManager getInstance() {
+  static HetimaChromeSocketManager getInstance() {
     return _instance;
   }
 
   void manageServerSocket() {
     chrome.sockets.tcpServer.onAccept.listen((chrome.AcceptInfo info) {
       print("--accept ok " + info.socketId.toString() + "," + info.clientSocketId.toString());
-      HetiServerSocketChrome server = _serverList[info.socketId];
+      HetimaServerSocketChrome server = _serverList[info.socketId];
       if (server != null) {
         server.onAcceptInternal(info);
       }
@@ -66,14 +66,14 @@ class HetiChromeSocketManager {
     bool closeChecking = false;
     chrome.sockets.tcp.onReceive.listen((chrome.ReceiveInfo info) {
      // core.print("--receive " + info.socketId.toString() + "," + info.data.getBytes().length.toString());
-      HetiSocketChrome socket = _clientList[info.socketId];
+      HetimaSocketChrome socket = _clientList[info.socketId];
       if (socket != null) {
         socket.onReceiveInternal(info);
       }
     });
     chrome.sockets.tcp.onReceiveError.listen((chrome.ReceiveErrorInfo info) {
       print("--receive error " + info.socketId.toString() + "," + info.resultCode.toString());
-      HetiSocketChrome socket = _clientList[info.socketId];
+      HetimaSocketChrome socket = _clientList[info.socketId];
       if (socket != null) {
         closeChecking = true;
         socket.close();
@@ -81,7 +81,7 @@ class HetiChromeSocketManager {
     });
     
     chrome.sockets.udp.onReceive.listen((chrome.ReceiveInfo info) {
-      HetiUdpSocketChrome socket = _udpList[info.socketId];
+      HetimaUdpSocketChrome socket = _udpList[info.socketId];
       if (socket != null) {
         socket.onReceiveInternal(info);
       }
@@ -91,7 +91,7 @@ class HetiChromeSocketManager {
     });
   }
 
-  void addServer(chrome.CreateInfo info, HetiServerSocketChrome socket) {
+  void addServer(chrome.CreateInfo info, HetimaServerSocketChrome socket) {
     _serverList[info.socketId] = socket;
   }
 
@@ -99,7 +99,7 @@ class HetiChromeSocketManager {
     _serverList.remove(info.socketId);
   }
 
-  void addClient(int socketId, HetiSocketChrome socket) {
+  void addClient(int socketId, HetimaSocketChrome socket) {
     _clientList[socketId] = socket;
   }
 
@@ -107,7 +107,7 @@ class HetiChromeSocketManager {
     _clientList.remove(socketId);
   }
 
-  void addUdp(int socketId, HetiUdpSocket socket) {
+  void addUdp(int socketId, HetimaUdpSocket socket) {
     _udpList[socketId] = socket;
   }
 

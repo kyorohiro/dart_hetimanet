@@ -1,28 +1,28 @@
 part of hetimanet.dartio;
 
-class HetiSocketBuilderDartIO extends HetiSocketBuilder {
-  HetiSocket createClient() {
-    return new HetiSocketDartIo();
+class HetimaSocketBuilderDartIO extends HetimaSocketBuilder {
+  HetimaSocket createClient() {
+    return new HetimaSocketDartIo();
   }
 
-  async.Future<HetiServerSocket> startServer(String address, int port) async {
-    return HetiServerSocketDartIo.startServer(address, port);
+  async.Future<HetimaServerSocket> startServer(String address, int port) async {
+    return HetimaServerSocketDartIo.startServer(address, port);
   }
 
-  HetiUdpSocket createUdpClient() {
-    return new HetiUdpSocketDartIo();
+  HetimaUdpSocket createUdpClient() {
+    return new HetimaUdpSocketDartIo();
   }
 
-  async.Future<List<HetiNetworkInterface>> getNetworkInterfaces() async {
+  async.Future<List<HetimaNetworkInterface>> getNetworkInterfaces() async {
     List<NetworkInterface> interfaces = await NetworkInterface.list(includeLoopback: true, includeLinkLocal: true);
-    List<HetiNetworkInterface> ret = [];
+    List<HetimaNetworkInterface> ret = [];
     for (NetworkInterface i in interfaces) {
       for (InternetAddress a in i.addresses) {
         int prefixLength = 24;
         if (a.rawAddress.length > 4) {
           prefixLength = 64;
         }
-        ret.add(new HetiNetworkInterface()
+        ret.add(new HetimaNetworkInterface()
           ..address = a.address
           ..name = i.name
           ..prefixLength = prefixLength);
@@ -32,20 +32,20 @@ class HetiSocketBuilderDartIO extends HetiSocketBuilder {
   }
 }
 
-class HetiServerSocketDartIo extends HetiServerSocket {
+class HetimaServerSocketDartIo extends HetimaServerSocket {
   ServerSocket _server = null;
-  async.StreamController<HetiSocket> _acceptStream = new async.StreamController.broadcast();
+  async.StreamController<HetimaSocket> _acceptStream = new async.StreamController.broadcast();
 
-  HetiServerSocketDartIo(ServerSocket server) {
+  HetimaServerSocketDartIo(ServerSocket server) {
     _server = server;
     _server.listen((Socket socket) {
-      _acceptStream.add(new HetiSocketDartIo.fromSocket(socket));
+      _acceptStream.add(new HetimaSocketDartIo.fromSocket(socket));
     });
   }
 
-  static async.Future<HetiServerSocket> startServer(String address, int port) async {
+  static async.Future<HetimaServerSocket> startServer(String address, int port) async {
     ServerSocket server = await ServerSocket.bind(address, port);
-    return new HetiServerSocketDartIo(server);
+    return new HetimaServerSocketDartIo(server);
   }
 
   @override
@@ -54,24 +54,24 @@ class HetiServerSocketDartIo extends HetiServerSocket {
   }
 
   @override
-  async.Stream<HetiSocket> onAccept() {
+  async.Stream<HetimaSocket> onAccept() {
     return _acceptStream.stream;
   }
 }
 
-class HetiSocketDartIo extends HetiSocket {
+class HetimaSocketDartIo extends HetimaSocket {
   Socket _socket = null;
 
-  HetiSocketDartIo() {}
-  HetiSocketDartIo.fromSocket(Socket socket) {
+  HetimaSocketDartIo() {}
+  HetimaSocketDartIo.fromSocket(Socket socket) {
     _socket = socket;
   }
 
   bool _nowConnecting = false;
-  async.StreamController<HetiCloseInfo> _closeStream = new async.StreamController.broadcast();
-  async.StreamController<HetiReceiveInfo> _receiveStream = new async.StreamController.broadcast();
+  async.StreamController<HetimaCloseInfo> _closeStream = new async.StreamController.broadcast();
+  async.StreamController<HetimaReceiveInfo> _receiveStream = new async.StreamController.broadcast();
   @override
-  async.Future<HetiSocket> connect(String peerAddress, int peerPort) async {
+  async.Future<HetimaSocket> connect(String peerAddress, int peerPort) async {
     if (_nowConnecting == true || _socket != null) {
       throw "connecting now";
     }
@@ -81,15 +81,15 @@ class HetiSocketDartIo extends HetiSocket {
       _socket.listen((List<int> data) {
         print('<<<lis>>> ');//${data.length} ${UTF8.decode(data)}');
         this.buffer.appendIntList(data,0, data.length);
-        _receiveStream.add(new HetiReceiveInfo(data));
+        _receiveStream.add(new HetimaReceiveInfo(data));
       }, onDone: () {
         print('<<<Done>>>');
         _socket.close();
-        _closeStream.add(new HetiCloseInfo());
+        _closeStream.add(new HetimaCloseInfo());
       }, onError: (e) {
         print('<<<Got error>>> $e');
         _socket.close();
-        _closeStream.add(new HetiCloseInfo());
+        _closeStream.add(new HetimaCloseInfo());
       });
       return this;
     } finally {
@@ -98,8 +98,8 @@ class HetiSocketDartIo extends HetiSocket {
   }
 
   @override
-  async.Future<HetiSocketInfo> getSocketInfo() async {
-    HetiSocketInfo info = new HetiSocketInfo();
+  async.Future<HetimaSocketInfo> getSocketInfo() async {
+    HetimaSocketInfo info = new HetimaSocketInfo();
     info.localAddress = _socket.address.address;
     info.localPort = _socket.port;
     info.peerAddress = _socket.remoteAddress.address;
@@ -115,27 +115,27 @@ class HetiSocketDartIo extends HetiSocket {
   }
 
   @override
-  async.Stream<HetiCloseInfo> get onClose => _closeStream.stream;
+  async.Stream<HetimaCloseInfo> get onClose => _closeStream.stream;
 
   @override
-  async.Stream<HetiReceiveInfo> get onReceive => _receiveStream.stream;
+  async.Stream<HetimaReceiveInfo> get onReceive => _receiveStream.stream;
 
   @override
-  async.Future<HetiSendInfo> send(List<int> data) async {
+  async.Future<HetimaSendInfo> send(List<int> data) async {
     await _socket.add(data);
-    return new HetiSendInfo(0);
+    return new HetimaSendInfo(0);
   }
 }
 
-class HetiUdpSocketDartIo extends HetiUdpSocket {
+class HetimaUdpSocketDartIo extends HetimaUdpSocket {
   RawDatagramSocket _udpSocket = null;
-  HetiUdpSocketDartIo() {}
+  HetimaUdpSocketDartIo() {}
 
   bool _isBindingNow = false;
-  async.StreamController<HetiReceiveUdpInfo> _receiveStream = new async.StreamController.broadcast();
+  async.StreamController<HetimaReceiveUdpInfo> _receiveStream = new async.StreamController.broadcast();
   
   @override
-  async.Future<HetiBindResult> bind(String address, int port, {bool multicast: false}) async {
+  async.Future<HetimaBindResult> bind(String address, int port, {bool multicast: false}) async {
     if (_isBindingNow != false) {
       throw "now binding";
     }
@@ -148,13 +148,13 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
         if(event == RawSocketEvent.READ) {
           Datagram dg = socket.receive();
           print("read ${dg.address}:${dg.port} ${dg.data.length}");
-          _receiveStream.add(new HetiReceiveUdpInfo(dg.data, dg.address.address, dg.port));
+          _receiveStream.add(new HetimaReceiveUdpInfo(dg.data, dg.address.address, dg.port));
         }
       });
     } finally {
       _isBindingNow = false;
     }
-    return new HetiBindResult();
+    return new HetimaBindResult();
   }
 
   @override
@@ -164,11 +164,11 @@ class HetiUdpSocketDartIo extends HetiUdpSocket {
   }
 
   @override
-  async.Stream<HetiReceiveUdpInfo> get onReceive => _receiveStream.stream;
+  async.Stream<HetimaReceiveUdpInfo> get onReceive => _receiveStream.stream;
 
   @override
-  async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port) async {
+  async.Future<HetimaUdpSendInfo> send(List<int> buffer, String address, int port) async {
    _udpSocket.send(buffer, new InternetAddress(address), port);
-   return await new HetiUdpSendInfo(0);
+   return await new HetimaUdpSendInfo(0);
   }
 }

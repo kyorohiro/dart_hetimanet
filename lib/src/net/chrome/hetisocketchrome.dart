@@ -1,48 +1,48 @@
 part of hetimanet.chrome;
 
-class HetiSocketChrome extends HetiSocket {
+class HetimaSocketChrome extends HetimaSocket {
 
   bool _isClose = false;
   int clientSocketId;
-  StreamController<HetiReceiveInfo> _controllerReceive = new StreamController.broadcast();
-  StreamController<HetiCloseInfo> _controllerClose= new StreamController.broadcast();
-  HetiSocketChrome.empty() {}
+  StreamController<HetimaReceiveInfo> _controllerReceive = new StreamController.broadcast();
+  StreamController<HetimaCloseInfo> _controllerClose= new StreamController.broadcast();
+  HetimaSocketChrome.empty() {}
 
-  HetiSocketChrome(int _clientSocketId) {
-    HetiChromeSocketManager.getInstance().addClient(_clientSocketId, this);
+  HetimaSocketChrome(int _clientSocketId) {
+    HetimaChromeSocketManager.getInstance().addClient(_clientSocketId, this);
     chrome.sockets.tcp.setPaused(_clientSocketId, false);
     clientSocketId = _clientSocketId;
   }
 
-  Stream<HetiReceiveInfo> get onReceive => _controllerReceive.stream;
+  Stream<HetimaReceiveInfo> get onReceive => _controllerReceive.stream;
 
   void onReceiveInternal(chrome.ReceiveInfo info) {
     updateTime();
     List<int> tmp = info.data.getBytes();
     buffer.appendIntList(tmp, 0, tmp.length);
-    _controllerReceive.add(new HetiReceiveInfo(info.data.getBytes()));
+    _controllerReceive.add(new HetimaReceiveInfo(info.data.getBytes()));
   }
 
-  Future<HetiSendInfo> send(List<int> data) {
+  Future<HetimaSendInfo> send(List<int> data) {
     updateTime();
-    Completer<HetiSendInfo> completer = new Completer();
+    Completer<HetimaSendInfo> completer = new Completer();
     new Future.sync(() {
       chrome.ArrayBuffer buffer = new chrome.ArrayBuffer.fromBytes(data);
       return chrome.sockets.tcp.send(clientSocketId, buffer).then((chrome.SendInfo info) {
         updateTime();
-        completer.complete(new HetiSendInfo(info.resultCode));
+        completer.complete(new HetimaSendInfo(info.resultCode));
       });
     }).catchError((e) {
-      completer.complete(new HetiSendInfo(-1999));
+      completer.complete(new HetimaSendInfo(-1999));
     });
     return completer.future;
   }
 
-  Future<HetiSocketInfo> getSocketInfo() {
-    Completer<HetiSocketInfo> completer = new Completer();
+  Future<HetimaSocketInfo> getSocketInfo() {
+    Completer<HetimaSocketInfo> completer = new Completer();
     
     chrome.sockets.tcp.getInfo(clientSocketId).then((chrome.SocketInfo info) {
-      HetiSocketInfo ret = new HetiSocketInfo()
+      HetimaSocketInfo ret = new HetimaSocketInfo()
       ..localAddress = info.localAddress
       ..localPort = info.localPort
       ..peerAddress = info.peerAddress
@@ -53,14 +53,14 @@ class HetiSocketChrome extends HetiSocket {
     });
      return completer.future;
   }
-  Future<HetiSocket> connect(String peerAddress, int peerPort) {
-    Completer<HetiSocket> completer = new Completer();
+  Future<HetimaSocket> connect(String peerAddress, int peerPort) {
+    Completer<HetimaSocket> completer = new Completer();
     chrome.SocketProperties properties = new chrome.SocketProperties();
     chrome.sockets.tcp.create(properties).then((chrome.CreateInfo info) {
       return chrome.sockets.tcp.connect(info.socketId, peerAddress, peerPort).then((int e) {
           chrome.sockets.tcp.setPaused(info.socketId, false);
           clientSocketId = info.socketId;
-          HetiChromeSocketManager.getInstance().addClient(info.socketId, this);
+          HetimaChromeSocketManager.getInstance().addClient(info.socketId, this);
           completer.complete(this);
       });
     }).catchError(completer.completeError);
@@ -76,10 +76,10 @@ class HetiSocketChrome extends HetiSocket {
     chrome.sockets.tcp.close(clientSocketId).then((d) {
       print("##closed()");
     });
-    _controllerClose.add(new HetiCloseInfo());
-    HetiChromeSocketManager.getInstance().removeClient(clientSocketId);
+    _controllerClose.add(new HetimaCloseInfo());
+    HetimaChromeSocketManager.getInstance().removeClient(clientSocketId);
     _isClose = true;
   }
 
-  Stream<HetiCloseInfo> get onClose => _controllerClose.stream;
+  Stream<HetimaCloseInfo> get onClose => _controllerClose.stream;
 }

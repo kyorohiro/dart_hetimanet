@@ -22,7 +22,7 @@ class UpnpDeviceInfo {
 
   Map<String, String> _headerMap = {};
   List<UpnpDeviceServiceInfo> _serviceList = [];
-  HetiSocketBuilder socketBuilder;
+  HetimaSocketBuilder socketBuilder;
 
   List<UpnpDeviceServiceInfo> get serviceList => _serviceList;
   String _urlBase = "";
@@ -31,7 +31,7 @@ class UpnpDeviceInfo {
 
   String get presentationURL => _extractFirstValue(xml.parse(_serviceXml).root, "presentationURL", "");
 
-  UpnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetiSocketBuilder builder) {
+  UpnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetimaSocketBuilder builder) {
     socketBuilder = builder;
     for (HetiHttpResponseHeaderField header in headerField) {
       if (header.fieldName != null) {
@@ -54,7 +54,7 @@ class UpnpDeviceInfo {
     return buffer.toString();
   }
 
-  HetiSocketBuilder getSocketBuilder() {
+  HetimaSocketBuilder getSocketBuilder() {
     return socketBuilder;
   }
 

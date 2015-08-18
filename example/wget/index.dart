@@ -31,7 +31,7 @@ List<HttpUrl> toHttpUrl(List<String> addrs) {
 }
 
 void startGet(List<HttpUrl> addrs) {
-  HetiSocketBuilderChrome builder = new HetiSocketBuilderChrome();
+  HetimaSocketBuilderChrome builder = new HetimaSocketBuilderChrome();
   a() {
     if (addrs.length <= 0) {
       return;

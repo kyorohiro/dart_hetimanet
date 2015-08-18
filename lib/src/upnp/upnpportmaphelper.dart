@@ -19,13 +19,13 @@ class UpnpPortMapHelper {
   String _externalAddress = "";
 
   int get externalPort => _externalPort;
-  HetiSocketBuilder builder = null;
+  HetimaSocketBuilder builder = null;
   String get externalIp => _externalAddress;
   String get appIdDesc => "hetim(${appid})";
 
   List<UpnpDeviceInfo> _currentUpnpDeviceInfo = [];
 
-  UpnpPortMapHelper(HetiSocketBuilder builder, String appid) {
+  UpnpPortMapHelper(HetimaSocketBuilder builder, String appid) {
     this.appid = appid;
     this.builder = builder;
   }
@@ -180,16 +180,16 @@ class UpnpPortMapHelper {
   }
 
   async.Future<StartGetLocalIPResult> startGetLocalIp() {
-    return (this.builder).getNetworkInterfaces().then((List<HetiNetworkInterface> l) {
+    return (this.builder).getNetworkInterfaces().then((List<HetimaNetworkInterface> l) {
       // search 24
-      for (HetiNetworkInterface i in l) {
+      for (HetimaNetworkInterface i in l) {
         if (i.prefixLength == 24 && !i.address.startsWith("127")) {
           _controllerUpdateLocalIp.add(i.address);
           return new StartGetLocalIPResult(i.address, l);
         }
       }
       //
-      for (HetiNetworkInterface i in l) {
+      for (HetimaNetworkInterface i in l) {
         if (i.prefixLength == 64) {
           _controllerUpdateLocalIp.add(i.address);
           return new StartGetLocalIPResult(i.address, l);
@@ -232,11 +232,11 @@ class StartGetExternalIp {
 }
 
 class StartGetLocalIPResult {
-  StartGetLocalIPResult(String address, List<HetiNetworkInterface> l) {
+  StartGetLocalIPResult(String address, List<HetimaNetworkInterface> l) {
     localIP = address;
     networkInterface.addAll(l);
   }
   String localIP = "";
   bool get founded => localIP != null;
-  List<HetiNetworkInterface> networkInterface = [];
+  List<HetimaNetworkInterface> networkInterface = [];
 }

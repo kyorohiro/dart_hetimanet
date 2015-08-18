@@ -20,7 +20,7 @@ import 'dart:async' as async;
 ///*
 void main() {
   print("--##-");
-  hetima_cl.HetiSocketBuilderChrome builder = new hetima_cl.HetiSocketBuilderChrome();
+  hetima_cl.HetimaSocketBuilderChrome builder = new hetima_cl.HetimaSocketBuilderChrome();
   hetima.HetiHttpClient client = new hetima.HetiHttpClient(builder);
   //  client.connect("www.yahoo.co.jp", 80).then((int v){//"157.7.205.138"
   client.connect("www.google.com", 80).then((hetima.HetiHttpClientConnectResult v) {//"157.7.205.138"

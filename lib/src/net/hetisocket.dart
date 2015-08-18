@@ -2,19 +2,19 @@ library hetimanet.base;
 import 'dart:async' as async;
 import 'package:hetimacore/hetimacore.dart' as heti;
 
-abstract class HetiSocketBuilder {
-  HetiSocket createClient();
-  HetiUdpSocket createUdpClient();
-  async.Future<HetiServerSocket> startServer(String address, int port) ;
-  async.Future<List<HetiNetworkInterface>> getNetworkInterfaces(); 
+abstract class HetimaSocketBuilder {
+  HetimaSocket createClient();
+  HetimaUdpSocket createUdpClient();
+  async.Future<HetimaServerSocket> startServer(String address, int port) ;
+  async.Future<List<HetimaNetworkInterface>> getNetworkInterfaces(); 
 }
 
-abstract class HetiServerSocket {
-  async.Stream<HetiSocket> onAccept();
+abstract class HetimaServerSocket {
+  async.Stream<HetimaSocket> onAccept();
   void close();
 }
 
-class HetiServerSocketError {
+class HetimaServerSocketError {
   static const ID_NONE = 0;
   static const ID_START = 1;
   static const REASON_NONE = 0;
@@ -22,14 +22,14 @@ class HetiServerSocketError {
   int reason = 0;
 }
 
-abstract class HetiSocket {
+abstract class HetimaSocket {
   int lastUpdateTime = 0;
   heti.ArrayBuilder buffer = new heti.ArrayBuilder();
-  async.Future<HetiSocket> connect(String peerAddress, int peerPort) ;
-  async.Future<HetiSendInfo> send(List<int> data);
-  async.Future<HetiSocketInfo> getSocketInfo();
-  async.Stream<HetiReceiveInfo> onReceive;
-  async.Stream<HetiCloseInfo> onClose;
+  async.Future<HetimaSocket> connect(String peerAddress, int peerPort) ;
+  async.Future<HetimaSendInfo> send(List<int> data);
+  async.Future<HetimaSocketInfo> getSocketInfo();
+  async.Stream<HetimaReceiveInfo> onReceive;
+  async.Stream<HetimaCloseInfo> onClose;
   bool isClosed = false;
   void close() {
     buffer.immutable = true;
@@ -41,50 +41,50 @@ abstract class HetiSocket {
   }
 }
 
-abstract class HetiUdpSocket {
+abstract class HetimaUdpSocket {
   ///
   /// The result code returned from the underlying network call. A
   /// negative value indicates an error.
   ///
-  async.Future<HetiBindResult> bind(String address, int port, {bool multicast:false});
-  async.Future<HetiUdpSendInfo> send(List<int> buffer, String address, int port);
-  async.Stream<HetiReceiveUdpInfo> onReceive;
+  async.Future<HetimaBindResult> bind(String address, int port, {bool multicast:false});
+  async.Future<HetimaUdpSendInfo> send(List<int> buffer, String address, int port);
+  async.Stream<HetimaReceiveUdpInfo> onReceive;
   async.Future<dynamic> close();
 }
 
-class HetiBindResult {
+class HetimaBindResult {
   
 }
 
-class HetiNetworkInterface
+class HetimaNetworkInterface
 {
   String address;
   int prefixLength;
   String name;
 }
 
-class HetiSocketInfo {
+class HetimaSocketInfo {
   String peerAddress = "";
   int peerPort = 0;
   String localAddress = "";
   int localPort = 0;
 }
 
-class HetiSendInfo {
+class HetimaSendInfo {
   int resultCode = 0;
-  HetiSendInfo(int _resultCode) {
+  HetimaSendInfo(int _resultCode) {
     resultCode = _resultCode;
   }
 }
 
-class HetiReceiveInfo {
+class HetimaReceiveInfo {
   List<int> data;
-  HetiReceiveInfo(List<int> _data) {
+  HetimaReceiveInfo(List<int> _data) {
     data = _data;
   }
 }
 
-class HetiCloseInfo {
+class HetimaCloseInfo {
   
 }
 
@@ -92,20 +92,20 @@ class HetiCloseInfo {
 // print("a:"+s["remoteAddress"]);
 // print("p:"+s["remotePort"]
 //
-class HetiReceiveUdpInfo {
+class HetimaReceiveUdpInfo {
   List<int> data;
   String remoteAddress;
   int remotePort;
-  HetiReceiveUdpInfo(List<int> adata, String aremoteAddress, int aport) {
+  HetimaReceiveUdpInfo(List<int> adata, String aremoteAddress, int aport) {
     data = adata;
     remoteAddress = aremoteAddress;
     remotePort = aport;
   }
 }
 
-class HetiUdpSendInfo {
+class HetimaUdpSendInfo {
   int resultCode = 0;
-  HetiUdpSendInfo(int _resultCode) {
+  HetimaUdpSendInfo(int _resultCode) {
     resultCode = _resultCode;
   }
 }

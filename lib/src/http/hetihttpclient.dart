@@ -26,15 +26,15 @@ class HetiHttpClientConnectResult {
   
 }
 class HetiHttpClient {
-  HetiSocketBuilder _socketBuilder;
+  HetimaSocketBuilder _socketBuilder;
   HetimaDataBuilder _dataBuilder;
-  HetiSocket socket = null;
+  HetimaSocket socket = null;
   String host;
   int port;
 
   bool _verbose = false;
   //, [HetimaDataBuilder b]
-  HetiHttpClient(HetiSocketBuilder socketBuilder, {HetimaDataBuilder dataBuilder:null, bool verbose:false}) {
+  HetiHttpClient(HetimaSocketBuilder socketBuilder, {HetimaDataBuilder dataBuilder:null, bool verbose:false}) {
     _socketBuilder = socketBuilder;
     _verbose = verbose;
   }
@@ -51,7 +51,7 @@ class HetiHttpClient {
     if(_verbose == true) {
       print("<hetihttpclient f=connect> ${socket}");
     }
-    socket.connect(host, port).then((HetiSocket socket) {
+    socket.connect(host, port).then((HetimaSocket socket) {
       if (socket == null) {
         completer.completeError(new Exception(""));
       } else {
@@ -82,12 +82,12 @@ class HetiHttpClient {
     }
     builder.appendString("\r\n");
 
-    socket.onReceive.listen((HetiReceiveInfo info) {
+    socket.onReceive.listen((HetimaReceiveInfo info) {
       if(_verbose == true) {
         print("<hetihttpclient f=onReceive> Length${path}:${info.data.length} ${convert.UTF8.decode(info.data)}</hetihttpclient>");
       }
     });
-    socket.send(builder.toList()).then((HetiSendInfo info) {});
+    socket.send(builder.toList()).then((HetimaSendInfo info) {});
 
     handleResponse(completer);
     return completer.future;
@@ -125,8 +125,8 @@ class HetiHttpClient {
       });
     });
     //
-    socket.onReceive.listen((HetiReceiveInfo info) {});
-    socket.send(builder.toList()).then((HetiSendInfo info) {});
+    socket.onReceive.listen((HetimaReceiveInfo info) {});
+    socket.send(builder.toList()).then((HetimaSendInfo info) {});
 
     handleResponse(completer);
     return completer.future;
@@ -164,8 +164,8 @@ class HetiHttpClient {
       });
     });
     //
-    socket.onReceive.listen((HetiReceiveInfo info) {});
-    socket.send(builder.toList()).then((HetiSendInfo info) {});
+    socket.onReceive.listen((HetimaReceiveInfo info) {});
+    socket.send(builder.toList()).then((HetimaSendInfo info) {});
 
     handleResponse(completer);
     return completer.future;

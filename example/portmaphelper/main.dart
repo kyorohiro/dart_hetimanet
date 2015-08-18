@@ -3,12 +3,12 @@ import 'package:hetimanet/hetimanet_dartio.dart';
 //
 //
 main()  async {
-  HetiSocketBuilder builder = new HetiSocketBuilderDartIO(); 
+  HetimaSocketBuilder builder = new HetimaSocketBuilderDartIO(); 
   UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test");
   //
   // get network interface
-  List<HetiNetworkInterface> interfaces = await builder.getNetworkInterfaces();
-  for (HetiNetworkInterface i in interfaces) {
+  List<HetimaNetworkInterface> interfaces = await builder.getNetworkInterfaces();
+  for (HetimaNetworkInterface i in interfaces) {
     print("<ni>${i.address} ${i.prefixLength} ${i.name}");
   }
   //
@@ -23,7 +23,7 @@ main()  async {
   // get local ip
   try {
     StartGetLocalIPResult loip = await helper.startGetLocalIp();
-    for(HetiNetworkInterface i in loip.networkInterface) {
+    for(HetimaNetworkInterface i in loip.networkInterface) {
       print("<glip> ${i.address} ${i.name}");      
     }
   } catch (e) {

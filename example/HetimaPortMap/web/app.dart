@@ -71,15 +71,15 @@ async.Future setupUpnp() {
   }
 
   return async.Future.wait(closeFutures).then((_) {
-    return (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
+    return (new hetima.HetimaSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetimaNetworkInterface> interfaceList) {
       mainView.clearNetworkInterface();
-      for (hetima.HetiNetworkInterface i in interfaceList) {
+      for (hetima.HetimaNetworkInterface i in interfaceList) {
         if (i.prefixLength == 24) {
           ipList.add(i.address);
         }
       }
       for (String ip in ipList) {
-        searchFutures.add(hetima.UpnpDeviceSearcher.createInstance(new hetima.HetiSocketBuilderChrome(), ip: ip));
+        searchFutures.add(hetima.UpnpDeviceSearcher.createInstance(new hetima.HetimaSocketBuilderChrome(), ip: ip));
       }
       return async.Future.wait(searchFutures);
     }).then((List a) {
@@ -107,9 +107,9 @@ void startUpdateIpInfo() {
     return;
   }
 
-  (new hetima.HetiSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetiNetworkInterface> interfaceList) {
+  (new hetima.HetimaSocketBuilderChrome()).getNetworkInterfaces().then((List<hetima.HetimaNetworkInterface> interfaceList) {
     mainView.clearNetworkInterface();
-    for (hetima.HetiNetworkInterface i in interfaceList) {
+    for (hetima.HetimaNetworkInterface i in interfaceList) {
       var interface = new appview.AppNetworkInterface();
       interface.ip = i.address;
       interface.length = "${i.prefixLength}";

@@ -3,17 +3,17 @@ library hetimanet.simu;
 import 'dart:async';
 import 'hetisocket.dart';
 
-class HetiSocketBuilderSimu extends HetiSocketBuilder {
-  HetiSocket createClient() {
+class HetiSocketBuilderSimu extends HetimaSocketBuilder {
+  HetimaSocket createClient() {
     return null;
   }
-  HetiUdpSocket createUdpClient() {
+  HetimaUdpSocket createUdpClient() {
     return new HetiUdpSocketSimu();
   }
-  Future<HetiServerSocket> startServer(String address, int port) {
+  Future<HetimaServerSocket> startServer(String address, int port) {
     return null;
   }
-  Future<List<HetiNetworkInterface>> getNetworkInterfaces() {
+  Future<List<HetimaNetworkInterface>> getNetworkInterfaces() {
     return null;
   }
 }
@@ -26,14 +26,14 @@ class HetiUdpSocketSimuMane {
   Map<String, HetiUdpSocketSimu> nodes = {};
 }
 
-class HetiUdpSocketSimu extends HetiUdpSocket {
+class HetiUdpSocketSimu extends HetimaUdpSocket {
   String _ip = "";
   int _port;
 
   String get ip => _ip;
   int get port => _port;
 
-  Future<HetiBindResult> bind(String ip, int port,{bool multicast:false}) {
+  Future<HetimaBindResult> bind(String ip, int port,{bool multicast:false}) {
     this._ip = ip;
     this._port = port;
     return new Future(() {
@@ -50,7 +50,7 @@ class HetiUdpSocketSimu extends HetiUdpSocket {
     });
   }
 
-  Future<HetiUdpSendInfo> send(List<int> buffer, String ip, int port) {
+  Future<HetimaUdpSendInfo> send(List<int> buffer, String ip, int port) {
     return new Future(() {
       if (!HetiUdpSocketSimuMane.instance.nodes.containsKey("${ip}:${port}")) {
         throw {"": "not found"};
@@ -60,11 +60,11 @@ class HetiUdpSocketSimu extends HetiUdpSocket {
   }
 
   StreamController _receiveMessage = new StreamController.broadcast();
-  Stream<HetiReceiveUdpInfo> get onReceive => _receiveMessage.stream;
+  Stream<HetimaReceiveUdpInfo> get onReceive => _receiveMessage.stream;
 
   Future receive(List<int> bytes, String ip, int port) {
     return new Future(() {
-      _receiveMessage.add(new HetiReceiveUdpInfo(bytes, ip, port));
+      _receiveMessage.add(new HetimaReceiveUdpInfo(bytes, ip, port));
     });
   }
 }

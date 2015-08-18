@@ -9,11 +9,11 @@ import 'hetihttpresponse.dart';
 class HetiHttpServer {
 
   async.StreamController _controllerOnNewRequest = new async.StreamController.broadcast();
-  HetiSocketBuilder _builder;
+  HetimaSocketBuilder _builder;
   String host;
   int port;
-  HetiServerSocket _serverSocket = null;
-  HetiHttpServer._internal(HetiServerSocket s) {
+  HetimaServerSocket _serverSocket = null;
+  HetiHttpServer._internal(HetimaServerSocket s) {
     _serverSocket = s;
   }
 
@@ -26,16 +26,16 @@ class HetiHttpServer {
     }
   }
 
-  static async.Future<HetiHttpServer> bind(HetiSocketBuilder builder, String address, int port) {
+  static async.Future<HetiHttpServer> bind(HetimaSocketBuilder builder, String address, int port) {
     async.Completer<HetiHttpServer> completer = new async.Completer();
-    builder.startServer(address, port).then((HetiServerSocket serverSocket){
+    builder.startServer(address, port).then((HetimaServerSocket serverSocket){
       if(serverSocket == null) {
         completer.completeError({});
         return;
       }
       HetiHttpServer server = new HetiHttpServer._internal(serverSocket);
       completer.complete(server);
-      serverSocket.onAccept().listen((HetiSocket socket){
+      serverSocket.onAccept().listen((HetimaSocket socket){
         EasyParser parser = new EasyParser(socket.buffer);
         HetiHttpResponse.decodeRequestMessage(parser).then((HetiHttpRequestMessageWithoutBody body){
           HetiHttpServerRequest request = new HetiHttpServerRequest();          
@@ -62,6 +62,6 @@ class HetiHttpServer {
 
 class HetiHttpServerRequest
 {
-  HetiSocket socket;
+  HetimaSocket socket;
   HetiHttpRequestMessageWithoutBody info;
 }
