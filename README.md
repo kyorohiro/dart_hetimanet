@@ -18,6 +18,12 @@ https://github.com/kyorohiro/HetimaPortMap
 * [Retirect Server Sample](example/redirectserver)
 
 ### UPnP Portmap
+* sample app 
+  example/HetimaPortMap
+  https://chrome.google.com/webstore/detail/hetimaportmap/naifildeohmcocnmibaampijofhcohif
+* sample source
+  example/portmaphelper
+
 ```
 import 'package:hetimanet/hetimanet.dart';
 import 'package:hetimanet/hetimanet_dartio.dart';
