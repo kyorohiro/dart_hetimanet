@@ -85,7 +85,7 @@ class UpnpDeviceSearcher {
     EasyParser parser = new EasyParser(builder);
     builder.appendIntList(buffer, 0, buffer.length);
     HetiHttpMessageWithoutBody message = await HetiHttpResponse.decodeHttpMessage(parser);
-    UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder);
+    UpnpDeviceInfo info = new UpnpDeviceInfo(message.headerField, _socketBuilder, verbose:_verbose);
 
     if (!deviceInfoList.contains(info)) {
       await info.extractService();
@@ -97,14 +97,17 @@ class UpnpDeviceSearcher {
   Future<HetimaBindResult> _initialize(String address) {
     _socket = _socketBuilder.createUdpClient();
     _socket.onReceive.listen((HetimaReceiveUdpInfo info) {
-      if (_verbose == true) {
-        print("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
-      }
+      log("<udp f=onReceive>" + convert.UTF8.decode(info.data) + "</udp>");
       extractDeviceInfoFromUdpResponse(info.data);
     });
     return _socket.bind(address, 0, multicast: true);
   }
 
+  log(String message) {
+    if (_verbose == true) {
+      print("--${message}");
+    }
+  }
 }
 
 class UpnpDeviceSearcherException extends StateError {

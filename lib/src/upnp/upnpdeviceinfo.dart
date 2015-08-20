@@ -31,7 +31,10 @@ class UpnpDeviceInfo {
 
   String get presentationURL => _extractFirstValue(xml.parse(_serviceXml).root, "presentationURL", "");
 
-  UpnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetimaSocketBuilder builder) {
+  bool _verbose = false;
+  bool get verbose => _verbose;
+  UpnpDeviceInfo(List<HetiHttpResponseHeaderField> headerField, HetimaSocketBuilder builder, {bool verbose:false}) {
+    _verbose = verbose;
     socketBuilder = builder;
     for (HetiHttpResponseHeaderField header in headerField) {
       if (header.fieldName != null) {
@@ -145,7 +148,13 @@ class UpnpDeviceInfo {
         _serviceList.add(info);
       }
     } catch (e) {
-      print("xml parse error: ${_serviceXml}");
+      log("xml parse error: ${_serviceXml}");
+    }
+  }
+  
+  log(String message) {
+    if (_verbose == true) {
+      print("--${message}");
     }
   }
 }

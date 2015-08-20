@@ -19,9 +19,12 @@ class UpnpPPPDevice {
   UpnpDeviceInfo _base = null;
   String _serviceName = "WANPPPConnection";
   String _version = "1";
+  bool _verbose = false;
+  bool get verbose => _verbose;
 
-  UpnpPPPDevice(UpnpDeviceInfo base) {
+  UpnpPPPDevice(UpnpDeviceInfo base, {bool verbose:false}) {
     _base = base;
+    _verbose = verbose;
 
     String st = _base.getValue(UpnpDeviceInfo.KEY_ST, "WANIPConnection");
     if (st.contains("WANIPConnection")) {
@@ -157,6 +160,12 @@ class UpnpPPPDevice {
     int length = await response.body.getLength();
     List<int> body = await response.body.getByteFuture(0, length);
     return new UpnpPPPDeviceRequestResponse(response.message.line.statusCode, convert.UTF8.decode(body));
+  }
+  
+  log(String message) {
+    if (_verbose == true) {
+      print("--${message}");
+    }
   }
 }
 

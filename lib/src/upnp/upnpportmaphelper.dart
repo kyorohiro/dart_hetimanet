@@ -24,11 +24,15 @@ class UpnpPortMapHelper {
   String get appIdDesc => "hetim(${appid})";
 
   List<UpnpDeviceInfo> _currentUpnpDeviceInfo = [];
+  bool _verbose = false;
+  bool get verbose => _verbose;
 
-  UpnpPortMapHelper(HetimaSocketBuilder builder, String appid) {
+  UpnpPortMapHelper(HetimaSocketBuilder builder, String appid,{bool verbose:false}) {
     this.appid = appid;
     this.builder = builder;
+    this._verbose = verbose;
   }
+
   async.StreamController<String> _controllerUpdateGlobalPort = new async.StreamController.broadcast();
   async.Stream<String> get onUpdateGlobalPort => _controllerUpdateGlobalPort.stream;
 
@@ -45,7 +49,7 @@ class UpnpPortMapHelper {
     _externalPort = basePort;
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
     UpnpDeviceInfo info = deviceInfoList.first;
-    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose:_verbose);
     UpnpGetExternalIPAddressResponse res = await pppDevice.requestGetExternalIPAddress();
     _externalAddress = res.externalIp;
     _controllerUpdateGlobalIp.add(res.externalIp);
@@ -57,7 +61,7 @@ class UpnpPortMapHelper {
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
 
     UpnpDeviceInfo info = deviceInfoList.first;
-    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose:_verbose);
     int maxRetryExternalPort = _externalPort + numOfRetry;
 
     tryAddPortMap() {
@@ -100,7 +104,7 @@ class UpnpPortMapHelper {
       if (reuseRouter == true && _currentUpnpDeviceInfo.length > 0) {
         return _currentUpnpDeviceInfo;
       } else {
-        return UpnpDeviceSearcher.createInstance(this.builder).then((UpnpDeviceSearcher searcher) {
+        return UpnpDeviceSearcher.createInstance(this.builder, verbose:_verbose).then((UpnpDeviceSearcher searcher) {
           return searcher.searchWanPPPDevice().then((_) {
             if (searcher.deviceInfoList.length <= 0) {
               throw {"failed": "not found router"};
@@ -126,7 +130,7 @@ class UpnpPortMapHelper {
     return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
       List<async.Future> futures = [];
       UpnpDeviceInfo info = deviceInfoList.first;
-      UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+      UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose:_verbose);
       for (int port in deleteExternalPortList) {
         futures.add(pppDevice.requestDeletePortMapping(port, newProtocol));
       }
@@ -144,7 +148,7 @@ class UpnpPortMapHelper {
       GetPortMapInfoResult result = new GetPortMapInfoResult();
 
       tryGetPortMapInfo() {
-        UpnpPPPDevice pppDevice = new UpnpPPPDevice(info);
+        UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose:_verbose);
         return pppDevice.requestGetGenericPortMapping(index++).then((UpnpGetGenericPortMappingResponse res) {
           if (res.resultCode != 200) {
             return result;
