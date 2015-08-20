@@ -22,9 +22,8 @@ class HetiHttpClientResponse {
   }
 }
 
-class HetiHttpClientConnectResult {
-  
-}
+class HetiHttpClientConnectResult {}
+
 class HetiHttpClient {
   HetimaSocketBuilder _socketBuilder;
   HetimaDataBuilder _dataBuilder;
@@ -33,39 +32,28 @@ class HetiHttpClient {
   int port;
 
   bool _verbose = false;
-  //, [HetimaDataBuilder b]
-  HetiHttpClient(HetimaSocketBuilder socketBuilder, {HetimaDataBuilder dataBuilder:null, bool verbose:false}) {
+
+  HetiHttpClient(HetimaSocketBuilder socketBuilder, {HetimaDataBuilder dataBuilder: null, bool verbose: false}) {
     _socketBuilder = socketBuilder;
     _verbose = verbose;
   }
 
-  async.Future<HetiHttpClientConnectResult> connect(String _host, int _port) {
+  async.Future<HetiHttpClientConnectResult> connect(String _host, int _port) async {
     host = _host;
     port = _port;
-    async.Completer<HetiHttpClientConnectResult> completer = new async.Completer();
     socket = _socketBuilder.createClient();
     if (socket == null) {
-      completer.completeError(new Exception(""));
-      return completer.future;
+      throw {};
     }
-    if(_verbose == true) {
-      print("<hetihttpclient f=connect> ${socket}");
+    log("<hetihttpclient f=connect> ${socket}");
+    HetimaSocket s = await socket.connect(host, port);
+    if (s == null) {
+      throw {};
     }
-    socket.connect(host, port).then((HetimaSocket socket) {
-      if (socket == null) {
-        completer.completeError(new Exception(""));
-      } else {
-        completer.complete(new HetiHttpClientConnectResult());
-      }
-    }).catchError((e) {
-      completer.completeError(e);
-    });
-    return completer.future;
+    return new HetiHttpClientConnectResult();
   }
 
-  async.Future<HetiHttpClientResponse> get(String path, [Map<String, String> header]) {
-    async.Completer<HetiHttpClientResponse> completer = new async.Completer();
-
+  async.Future<HetiHttpClientResponse> get(String path, [Map<String, String> header]) async {
     Map<String, String> headerTmp = {};
     headerTmp["Host"] = host + ":" + port.toString();
     headerTmp["Connection"] = "Close";
@@ -83,22 +71,18 @@ class HetiHttpClient {
     builder.appendString("\r\n");
 
     socket.onReceive.listen((HetimaReceiveInfo info) {
-      if(_verbose == true) {
+      if (_verbose == true) {
         print("<hetihttpclient f=onReceive> Length${path}:${info.data.length} ${convert.UTF8.decode(info.data)}</hetihttpclient>");
       }
     });
     socket.send(builder.toList()).then((HetimaSendInfo info) {});
-
-    handleResponse(completer);
-    return completer.future;
+    return handleResponse();
   }
 
   //
   // post
   //
-  async.Future<HetiHttpClientResponse> post(String path, List<int> body, [Map<String, String> header]) {
-    async.Completer<HetiHttpClientResponse> completer = new async.Completer();
-
+  async.Future<HetiHttpClientResponse> post(String path, List<int> body, [Map<String, String> header]) async {
     Map<String, String> headerTmp = {};
     headerTmp["Host"] = host + ":" + port.toString();
     headerTmp["Connection"] = "Close";
@@ -119,25 +103,16 @@ class HetiHttpClient {
     builder.appendIntList(body, 0, body.length);
 
     //
-    builder.getLength().then((int len) {
-      builder.getByteFuture(0, len).then((List<int> data) {
-        //print("request\r\n" + convert.UTF8.decode(data));
-      });
-    });
-    //
     socket.onReceive.listen((HetimaReceiveInfo info) {});
     socket.send(builder.toList()).then((HetimaSendInfo info) {});
 
-    handleResponse(completer);
-    return completer.future;
+    return handleResponse();
   }
 
   //
   // mpost for upnp protocol
   //
-  async.Future<HetiHttpClientResponse> mpost(String path, List<int> body, [Map<String, String> header]) {
-    async.Completer<HetiHttpClientResponse> completer = new async.Completer();
-
+  async.Future<HetiHttpClientResponse> mpost(String path, List<int> body, [Map<String, String> header]) async {
     Map<String, String> headerTmp = {};
     headerTmp["Host"] = host + ":" + port.toString();
     headerTmp["Connection"] = "Close";
@@ -156,61 +131,44 @@ class HetiHttpClient {
 
     builder.appendString("\r\n");
     builder.appendIntList(body, 0, body.length);
-
-    //
-    builder.getLength().then((int len) {
-      builder.getByteFuture(0, len).then((List<int> data) {
-        //print("request\r\n" + convert.UTF8.decode(data));
-      });
-    });
     //
     socket.onReceive.listen((HetimaReceiveInfo info) {});
     socket.send(builder.toList()).then((HetimaSendInfo info) {});
 
-    handleResponse(completer);
-    return completer.future;
+    return handleResponse();
   }
 
-  void handleResponse(async.Completer<HetiHttpClientResponse> completer) {
+  async.Future<HetiHttpClientResponse> handleResponse() async {
     EasyParser parser = new EasyParser(socket.buffer);
-    HetiHttpResponse.decodeHttpMessage(parser).then((HetiHttpMessageWithoutBody message) {
-      HetiHttpClientResponse result = new HetiHttpClientResponse();
-      result.message = message;
-      //
-      {
-        socket.buffer.getByteFuture(0, message.index).then((List<int> buffer) {
-          //print("response\r\n" + convert.UTF8.decode(buffer));
-        });
-      }
-      //
-      HetiHttpResponseHeaderField transferEncodingField = message.find("Transfer-Encoding");
-      if (transferEncodingField == null || transferEncodingField.fieldValue != "chunked") {
-        result.body = new HetimaReaderAdapter(socket.buffer, message.index);
-        if (result.message.contentLength > 0) {
-          result.body.getByteFuture(0, result.message.contentLength).then((e) {
-            if(_verbose == true) {
-               print("-------------------- immutable =true;[B] ${result.message.contentLength} ${message.index}");
-            }
-            result.body.immutable = true;
-          });
-        } else {
-          if(_verbose == true) {
-              print("-------------------- immutable =true; [A}");
-           }
-          result.body.immutable = true;
-        }
+    HetiHttpMessageWithoutBody message = await HetiHttpResponse.decodeHttpMessage(parser);
+    HetiHttpClientResponse result = new HetiHttpClientResponse();
+    result.message = message;
+
+    HetiHttpResponseHeaderField transferEncodingField = message.find("Transfer-Encoding");
+
+    if (transferEncodingField == null || transferEncodingField.fieldValue != "chunked") {
+      result.body = new HetimaReaderAdapter(socket.buffer, message.index);
+      if (result.message.contentLength > 0) {
+        await  result.body.getByteFuture(0, result.message.contentLength);
+        result.body.immutable = true;
       } else {
-        result.body = new ChunkedBuilderAdapter(new HetimaReaderAdapter(socket.buffer, message.index)).start();
+        result.body.immutable = true;
       }
-      completer.complete(result);
-    }).catchError((e) {
-      completer.completeError(e);
-    });
+    } else {
+      result.body = new ChunkedBuilderAdapter(new HetimaReaderAdapter(socket.buffer, message.index)).start();
+    }
+    return result;
   }
 
   void close() {
     if (socket != null) {
       socket.close();
+    }
+  }
+
+  void log(String message) {
+    if (_verbose) {
+      print("++${message}");
     }
   }
 }
