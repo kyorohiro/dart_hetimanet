@@ -60,7 +60,7 @@ class HetimaSocketChrome extends HetimaSocket {
     }
     updateTime();
     chrome.sockets.tcp.close(clientSocketId).then((d) {
-      print("##closed()");
+      //print("##closed()");
     });
     _controllerClose.add(new HetimaCloseInfo());
     HetimaChromeSocketManager.getInstance().removeClient(clientSocketId);

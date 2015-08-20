@@ -46,7 +46,7 @@ class HetimaChromeSocketManager {
 
   void manageServerSocket() {
     chrome.sockets.tcpServer.onAccept.listen((chrome.AcceptInfo info) {
-      print("--accept ok " + info.socketId.toString() + "," + info.clientSocketId.toString());
+      //print("--accept ok " + info.socketId.toString() + "," + info.clientSocketId.toString());
       HetimaServerSocketChrome server = _serverList[info.socketId];
       if (server != null) {
         server.onAcceptInternal(info);
@@ -54,7 +54,7 @@ class HetimaChromeSocketManager {
     });
 
     chrome.sockets.tcpServer.onAcceptError.listen((chrome.AcceptErrorInfo info) {
-      print("--accept error");
+     // print("--accept error");
     });
 
     bool closeChecking = false;
@@ -66,7 +66,7 @@ class HetimaChromeSocketManager {
       }
     });
     chrome.sockets.tcp.onReceiveError.listen((chrome.ReceiveErrorInfo info) {
-      print("--receive error " + info.socketId.toString() + "," + info.resultCode.toString());
+      //print("--receive error " + info.socketId.toString() + "," + info.resultCode.toString());
       HetimaSocketChrome socket = _clientList[info.socketId];
       if (socket != null) {
         closeChecking = true;
@@ -81,7 +81,7 @@ class HetimaChromeSocketManager {
       }
     });
     chrome.sockets.udp.onReceiveError.listen((chrome.ReceiveErrorInfo info) {
-      print("--receive udp error " + info.socketId.toString() + "," + info.resultCode.toString());
+      //print("--receive udp error " + info.socketId.toString() + "," + info.resultCode.toString());
     });
   }
 

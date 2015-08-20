@@ -26,7 +26,6 @@ class HetiHttpClientConnectResult {}
 
 class HetiHttpClient {
   HetimaSocketBuilder _socketBuilder;
-  HetimaDataBuilder _dataBuilder;
   HetimaSocket socket = null;
   String host;
   int port;
@@ -72,7 +71,7 @@ class HetiHttpClient {
 
     socket.onReceive.listen((HetimaReceiveInfo info) {
       if (_verbose == true) {
-        print("<hetihttpclient f=onReceive> Length${path}:${info.data.length} ${convert.UTF8.decode(info.data)}</hetihttpclient>");
+        log("<hetihttpclient f=onReceive> Length${path}:${info.data.length} ${convert.UTF8.decode(info.data, allowMalformed:true)}</hetihttpclient>");
       }
     });
     socket.send(builder.toList()).then((HetimaSendInfo info) {});
