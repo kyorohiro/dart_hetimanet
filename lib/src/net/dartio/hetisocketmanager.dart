@@ -95,15 +95,15 @@ class HetimaSocketDartIo extends HetimaSocket {
     try {
       _socket = await Socket.connect(peerAddress, peerPort);
       _socket.listen((List<int> data) {
-        print('<<<lis>>> ');//${data.length} ${UTF8.decode(data)}');
+        log('<<<lis>>> ');//${data.length} ${UTF8.decode(data)}');
         this.buffer.appendIntList(data,0, data.length);
         _receiveStream.add(new HetimaReceiveInfo(data));
       }, onDone: () {
-        print('<<<Done>>>');
+        log('<<<Done>>>');
         _socket.close();
         _closeStream.add(new HetimaCloseInfo());
       }, onError: (e) {
-        print('<<<Got error>>> $e');
+        log('<<<Got error>>> $e');
         _socket.close();
         _closeStream.add(new HetimaCloseInfo());
       });
@@ -141,6 +141,12 @@ class HetimaSocketDartIo extends HetimaSocket {
     await _socket.add(data);
     return new HetimaSendInfo(0);
   }
+  
+  log(String message) {
+    if(_verbose) {
+      print("d..${message}");
+    }
+  }
 }
 
 class HetimaUdpSocketDartIo extends HetimaUdpSocket {
@@ -167,7 +173,7 @@ class HetimaUdpSocketDartIo extends HetimaUdpSocket {
       socket.listen((RawSocketEvent event) {
         if(event == RawSocketEvent.READ) {
           Datagram dg = socket.receive();
-          print("read ${dg.address}:${dg.port} ${dg.data.length}");
+          log("read ${dg.address}:${dg.port} ${dg.data.length}");
           _receiveStream.add(new HetimaReceiveUdpInfo(dg.data, dg.address.address, dg.port));
         }
       });
@@ -190,5 +196,11 @@ class HetimaUdpSocketDartIo extends HetimaUdpSocket {
   async.Future<HetimaUdpSendInfo> send(List<int> buffer, String address, int port) async {
    _udpSocket.send(buffer, new InternetAddress(address), port);
    return await new HetimaUdpSendInfo(0);
+  }
+  
+  log(String message) {
+    if(_verbose) {
+      print("d..${message}");
+    }
   }
 }
