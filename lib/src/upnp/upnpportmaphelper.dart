@@ -5,6 +5,7 @@ import '../net/hetisocket.dart';
 import 'upnpdeviceinfo.dart';
 import 'upnpdevicesearcher.dart';
 import 'upnppppdevice.dart';
+import 'upnppppdevice_result.dart';
 
 /**
  * app parts
