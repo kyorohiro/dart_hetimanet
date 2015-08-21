@@ -18,7 +18,7 @@ class HetiHttpServerHelper {
   String localIP = "0.0.0.0";
   int basePort = 18085;
   int _localPort = 18085;
-  int numOfRetry = 100;
+  int numOfRetry = 5;
   int get localPort => _localPort;
 
   HetiHttpServer _server = null;

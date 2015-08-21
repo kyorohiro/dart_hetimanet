@@ -35,6 +35,7 @@ void main() {
   httpServer.onUpdateLocalServer.listen((String localPort){
     mainView.localPort = localPort;
     portMap.basePort = int.parse(localPort);
+    portMap.localPort = int.parse(localPort);
   });
   portMap.onUpdateGlobalIp.listen((String globalIp) {
     mainView.globalIP = globalIp;
@@ -43,7 +44,7 @@ void main() {
     mainView.globalPort = globalPort;
   });
   portMap.onUpdateLocalIp.listen((String localIP) {
-    mainView.localIP = localIP;
+    //mainView.localIP = localIP;
   });
 
   mainView.onChRootPath.listen((String path){
@@ -52,13 +53,17 @@ void main() {
   });
 
   mainView.onInitAddress.listen((String ip) {
-    httpServer.localIP = ip;    
+   // httpServer.localIP = ip;    
   });
+
   mainView.init();
   mainView.onChangeMainButtonState.listen((bool isDown) {
     if (isDown) {
+      portMap.localIp = mainView.initIP;
+      httpServer.localIP = mainView.initIP; 
+      mainView.localIP =  mainView.initIP; 
       httpServer.startServer().then((hetima.HetiHttpStartServerResult v) {
-        return portMap.startGetLocalIp();
+
       }).then((_) {
         portMap.startPortMap();
       }).then((_){

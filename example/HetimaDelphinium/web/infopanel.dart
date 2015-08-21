@@ -6,10 +6,12 @@ part of delphiniumapp;
 class InfoPanel {
   ui.VerticalPanel infoForSubPanel = new ui.VerticalPanel();
   ui.TextBox _rootPath = new ui.TextBox();
-  ui.TextBox _initialAddress = new ui.TextBox();
+
+  // Add a drop box with the list types
+  ui.ListBox dropBox = new ui.ListBox();
 
   String get rootPath => _rootPath.text;
-  String get initAddress => _initialAddress.text;
+  String get initAddress => dropBox.getItemText(dropBox.getSelectedIndex());
 
   async.StreamController<String> _controllerRootPath = new async.StreamController.broadcast();
   async.Stream<String> get onChRootPath => _controllerRootPath.stream;
@@ -18,7 +20,6 @@ class InfoPanel {
   async.Stream<String> get onInitAddress => _controllerInitAddress.stream;
 
   InfoPanel() {
-    _initialAddress.text = "0.0.0.0";
     _rootPath.text = "hetima";
   }
 
@@ -40,9 +41,15 @@ class InfoPanel {
     layout.setWidget(1, 0, new ui.HtmlPanel("root path"));
     layout.setWidget(2, 1, _rootPath);
     layout.setWidget(3, 0, new ui.HtmlPanel("initial ip"));
-    layout.setWidget(4, 1, _initialAddress);
 //    _rootPath
     infoForSubPanel.add(layout);
+    layout.setWidget(4, 1, dropBox);
+    dropBox.addItem("0.0.0.0");
+    dropBox.setSelectedIndex(0);
+    new hetima.HetimaSocketBuilderChrome().getNetworkInterfaces().then((List<hetima.HetimaNetworkInterface> interfaces) {
+      for (hetima.HetimaNetworkInterface i in interfaces) {
+        dropBox.addItem("${i.address}");
+      }
+    });
   }
-
 }

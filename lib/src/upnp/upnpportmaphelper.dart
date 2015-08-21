@@ -14,6 +14,7 @@ class UpnpPortMapHelper {
   String appid = "";
   String localIp = "0.0.0.0";
   int basePort = 18085;
+  int localPort = 18085;
   int numOfRetry = 0;
   int _requestedPort = 18085;
   String _externalAddress = "";
@@ -33,6 +34,7 @@ class UpnpPortMapHelper {
     this._verbose = verbose;
     this.localIp = ip;
     this.basePort = port;
+    this.localPort = port;
     this.numOfRetry = retry;
   }
 
@@ -76,7 +78,7 @@ class UpnpPortMapHelper {
       List<Future> r = [];
       for (UpnpDeviceInfo info in deviceInfoList) {
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
-        r.add(pppDevice.requestAddPortMapping(_requestedPort, newProtocol, _requestedPort, info.helperOptAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0).catchError((_) {}));
+        r.add(pppDevice.requestAddPortMapping(_requestedPort, newProtocol, localPort, info.helperOptAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0).catchError((_) {}));
       }
       List<UpnpAddPortMappingResponse> ress = await Future.wait(r, eagerError: false);
 

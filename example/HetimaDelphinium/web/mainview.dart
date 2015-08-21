@@ -49,6 +49,7 @@ class MainView {
   void set globalPort(String port) => _mmainPanel.setGlobalPort(port);
   void set globalIP(String ip) => _mmainPanel.setGlobalIP(ip);
 
+  String get initIP => _minfoPane.initAddress;
   void clearFile() {
     _mfileListPanel.clearFile();
   }
