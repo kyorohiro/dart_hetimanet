@@ -149,7 +149,7 @@ class UpnpPPPDevice {
     if (info.controlURL != null && info.controlURL.length != 0) {
       path = info.controlURL;
     }
-    print("upnppppdevice.request ${host}:${port}");
+    log("upnppppdevice.request ${host}:${port}");
     await client.connect(host, port);
     HetiHttpClientResponse response = null;
     if (mode == MODE_POST) {

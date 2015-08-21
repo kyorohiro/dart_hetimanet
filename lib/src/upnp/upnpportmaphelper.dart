@@ -185,6 +185,9 @@ class UpnpPortMapHelper {
     for (UpnpDeviceInfo deviceInfo in deviceInfoList) {
       List<GetPortMapInfoResult> results = await getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter, eagerError: eagerError, info: deviceInfo);
       List<int> externalPortList = [];
+      if(deviceInfo == null) {
+        continue;
+      }
 
       for (GetPortMapInfoResult result in results) {
         for (PortMapInfo info in result.infos) {
@@ -212,16 +215,19 @@ class UpnpPortMapHelper {
       {bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, UpnpDeviceInfo info: null}) async {
     List<UpnpDeviceInfo> deviceInfoList = [];
     if (info == null) {
+      //print("[a]");
       deviceInfoList.addAll(await searchRoutder(reuseRouter: reuseRouter));
     } else {
+     // print("[b]");
       deviceInfoList.add(info);
     }
     List<Future> futures = [];
-    print("########");
+   // log("########");
     for (UpnpDeviceInfo info in deviceInfoList) {
+     // log("##### ad = ${info.helperOptAddress}");
       UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
       for (int port in deleteExternalPortList) {
-        print("#### port = ${port}");
+       // print("#### port = ${port}");
         futures.add(pppDevice.requestDeletePortMapping(port, newProtocol));
       }
     }
