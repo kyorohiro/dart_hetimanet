@@ -70,10 +70,9 @@ class UpnpPortMapHelper {
     _requestedPort = basePort;
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
 
-//    UpnpDeviceInfo info = deviceInfoList.first;
     int maxRetryExternalPort = _requestedPort + numOfRetry;
 
-    tryAddPortMap() async {
+    while(true) {
       List<Future> r = [];
       for (UpnpDeviceInfo info in deviceInfoList) {
         UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
@@ -106,7 +105,8 @@ class UpnpPortMapHelper {
       } else if (true == have500) {
         _requestedPort++;
         if (_requestedPort < maxRetryExternalPort) {
-          return tryAddPortMap();
+          //
+          continue;
         } else {
           throw {"failed": "redirect max"};
         }
@@ -114,8 +114,6 @@ class UpnpPortMapHelper {
         throw {"failed": "unexpected error code ${message}"};
       }
     }
-
-    return tryAddPortMap();
   }
 
   Future<List<UpnpDeviceInfo>> searchRoutder({bool reuseRouter: false}) async {
@@ -185,7 +183,7 @@ class UpnpPortMapHelper {
     for (UpnpDeviceInfo deviceInfo in deviceInfoList) {
       List<GetPortMapInfoResult> results = await getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter, eagerError: eagerError, info: deviceInfo);
       List<int> externalPortList = [];
-      if(deviceInfo == null) {
+      if (deviceInfo == null) {
         continue;
       }
 
@@ -215,19 +213,14 @@ class UpnpPortMapHelper {
       {bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, UpnpDeviceInfo info: null}) async {
     List<UpnpDeviceInfo> deviceInfoList = [];
     if (info == null) {
-      //print("[a]");
       deviceInfoList.addAll(await searchRoutder(reuseRouter: reuseRouter));
     } else {
-     // print("[b]");
       deviceInfoList.add(info);
     }
     List<Future> futures = [];
-   // log("########");
     for (UpnpDeviceInfo info in deviceInfoList) {
-     // log("##### ad = ${info.helperOptAddress}");
       UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
       for (int port in deleteExternalPortList) {
-       // print("#### port = ${port}");
         futures.add(pppDevice.requestDeletePortMapping(port, newProtocol));
       }
     }
@@ -254,7 +247,7 @@ class UpnpPortMapHelper {
     int index = 0;
     GetPortMapInfoResult result = new GetPortMapInfoResult(info.helperOptAddress);
 
-    while(true) {
+    while (true) {
       UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
       UpnpGetGenericPortMappingResponse res = await pppDevice.requestGetGenericPortMapping(index++);
       if (res.resultCode != 200) {
@@ -274,24 +267,23 @@ class UpnpPortMapHelper {
     }
   }
 
-  Future<StartGetLocalIPResult> startGetLocalIp() {
-    return (this.builder).getNetworkInterfaces().then((List<HetimaNetworkInterface> l) {
-      // search 24
-      for (HetimaNetworkInterface i in l) {
-        if (i.prefixLength == 24 && !i.address.startsWith("127")) {
-          _controllerUpdateLocalIp.add(i.address);
-          return new StartGetLocalIPResult(i.address, l);
-        }
+  Future<StartGetLocalIPResult> startGetLocalIp() async {
+    List<HetimaNetworkInterface> l = await (this.builder).getNetworkInterfaces();
+    // search 24
+    for (HetimaNetworkInterface i in l) {
+      if (i.prefixLength == 24 && !i.address.startsWith("127")) {
+        _controllerUpdateLocalIp.add(i.address);
+        return new StartGetLocalIPResult(i.address, l);
       }
-      //
-      for (HetimaNetworkInterface i in l) {
-        if (i.prefixLength == 64) {
-          _controllerUpdateLocalIp.add(i.address);
-          return new StartGetLocalIPResult(i.address, l);
-        }
+    }
+    //
+    for (HetimaNetworkInterface i in l) {
+      if (i.prefixLength == 64) {
+        _controllerUpdateLocalIp.add(i.address);
+        return new StartGetLocalIPResult(i.address, l);
       }
-      return new StartGetLocalIPResult("0.0.0.0", l);
-    });
+    }
+    return new StartGetLocalIPResult("0.0.0.0", l);
   }
 }
 
