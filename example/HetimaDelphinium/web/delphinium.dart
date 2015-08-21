@@ -21,7 +21,6 @@ part 'mainpanel.dart';
 part 'filelistpanel.dart';
 part 'mainview.dart';
 part 'httpserver.dart';
-part 'portmap.dart';
 part 'infopanel.dart';
 part 'swfplayer.dart';
 
@@ -31,7 +30,7 @@ void main() {
   mainView.downloadPath = downloadPath;
   DelphiniumHttpServer httpServer = new DelphiniumHttpServer();
   httpServer.dataPath = downloadPath;
-  hetima.UpnpPortMapHelper  portMap = new hetima.UpnpPortMapHelper(new hetima.HetimaSocketBuilderChrome(), "HetimaDelphinium");
+  hetima.UpnpPortMapHelper  portMap = new hetima.UpnpPortMapHelper(new hetima.HetimaSocketBuilderChrome(), "HetimaDelphinium", retry: 5);
 
   httpServer.onUpdateLocalServer.listen((String localPort){
     mainView.localPort = localPort;
