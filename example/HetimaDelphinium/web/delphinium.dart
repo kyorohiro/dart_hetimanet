@@ -31,11 +31,11 @@ void main() {
   mainView.downloadPath = downloadPath;
   DelphiniumHttpServer httpServer = new DelphiniumHttpServer();
   httpServer.dataPath = downloadPath;
-  PortMap portMap = new PortMap();
+  hetima.UpnpPortMapHelper  portMap = new hetima.UpnpPortMapHelper(new hetima.HetimaSocketBuilderChrome(), "HetimaDelphinium");
 
   httpServer.onUpdateLocalServer.listen((String localPort){
     mainView.localPort = localPort;
-    portMap.localPort = int.parse(localPort);
+    portMap.basePort = int.parse(localPort);
   });
   portMap.onUpdateGlobalIp.listen((String globalIp) {
     mainView.globalIP = globalIp;
@@ -62,10 +62,12 @@ void main() {
         return portMap.startGetLocalIp();
       }).then((int v) {
         portMap.startPortMap();
+      }).then((_){
+        portMap.startGetExternalIp(reuseRouter: true);
       });
     } else {
       httpServer.stopServer();
-      portMap.deleteAllPortMap();
+      portMap.deletePortMapFromAppIdDesc(reuseRouter: true);
     }
   });
 
@@ -80,7 +82,7 @@ void main() {
   });
 
   chrome.app.window.current().onClosed.listen((d) {
-    portMap.deleteAllPortMap();
+    portMap.deletePortMapFromAppIdDesc(reuseRouter: true);
     httpServer.stopServer();
   });
 }
