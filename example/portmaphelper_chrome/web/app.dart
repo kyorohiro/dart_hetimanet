@@ -9,7 +9,7 @@ import 'dart:isolate';
 main() async {
   HetimaSocketBuilder builder = new HetimaSocketBuilderChrome(); 
   UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test", ip:null, port:18080, retry:3);
-/*
+
   //
   // get network interface
   List<HetimaNetworkInterface> interfaces = await builder.getNetworkInterfaces();
@@ -35,7 +35,6 @@ main() async {
   } catch (e) {
     print("<glip ERROR> ${e}");
   }
-  */
   //
   // start portmap
   try {
