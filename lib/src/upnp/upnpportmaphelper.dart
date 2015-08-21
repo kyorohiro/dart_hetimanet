@@ -27,7 +27,7 @@ class UpnpPortMapHelper {
   bool _verbose = false;
   bool get verbose => _verbose;
 
-  UpnpPortMapHelper(HetimaSocketBuilder builder, String appid, {bool verbose: false, String ip: "0.0.0.0", int port:18080, int retry:0}) {
+  UpnpPortMapHelper(HetimaSocketBuilder builder, String appid, {bool verbose: false, String ip: "0.0.0.0", int port: 18080, int retry: 0}) {
     this.appid = appid;
     this.builder = builder;
     this._verbose = verbose;
@@ -96,15 +96,12 @@ class UpnpPortMapHelper {
       }
 
       if (eagerError == false && have200 == true) {
-        print("--A-");
         _controllerUpdateGlobalPort.add("${_requestedPort}");
         return new StartPortMapResult();
       } else if (true == all200) {
-        print("--B-");
         _controllerUpdateGlobalPort.add("${_requestedPort}");
         return new StartPortMapResult();
       } else if (true == have500) {
-        print("--C-");
         _requestedPort++;
         if (_requestedPort < maxRetryExternalPort) {
           return tryAddPortMap();
@@ -134,33 +131,58 @@ class UpnpPortMapHelper {
         r.add(deleteAllPortMap(externalPortList, newProtocol: newProtocol));
       }
 
-      return Future.wait(r, eagerError: eagerError).then((d){
+      return Future.wait(r, eagerError: eagerError).then((d) {
         return new DeleteAllPortMapResult();
       });
     });
   }
 
-  Future<List<UpnpDeviceInfo>> searchRoutder({bool reuseRouter: false}) {
-    return new Future(() {
-      if (reuseRouter == true && _currentUpnpDeviceInfo.length > 0) {
-        return _currentUpnpDeviceInfo;
-      } else {
-        return UpnpDeviceSearcher.createInstance(this.builder, verbose: _verbose, ip: localIp).then((UpnpDeviceSearcher searcher) {
-          return searcher.searchWanPPPDevice(3).then((_) {
-            if (searcher.deviceInfoList.length <= 0) {
-              throw {"failed": "not found router"};
-            }
-            _currentUpnpDeviceInfo.clear();
-            _currentUpnpDeviceInfo.addAll(searcher.deviceInfoList);
-            return searcher.deviceInfoList;
-          }).whenComplete(() {
-            try {
-              searcher.close();
-            } catch (e) {}
-          });
-        });
+  Future<List<UpnpDeviceInfo>> searchRoutder({bool reuseRouter: false}) async {
+    if (reuseRouter == true && _currentUpnpDeviceInfo.length > 0) {
+      return _currentUpnpDeviceInfo;
+    } else {
+      _currentUpnpDeviceInfo.clear();
+      StartGetLocalIPResult r = await this.startGetLocalIp();
+      List<Future> f = [];
+      if(localIp == null) {
+      for (HetimaNetworkInterface i in r.networkInterface) {
+        if (i.prefixLength == 24 && i.address != "127.0.0.1") {
+          f.add(searchRoutderFromAddress(i.address, reuseRouter: reuseRouter));
+        }
       }
-    });
+      } else {
+        f.add(searchRoutderFromAddress(localIp, reuseRouter: reuseRouter));
+      }
+      List<UpnpDeviceInfo> ret = [];
+      return Future.wait(f).then((List<List<UpnpDeviceInfo>> rs) {
+        for (List<UpnpDeviceInfo> r in rs) {
+          _currentUpnpDeviceInfo.addAll(r);
+          ret.addAll(r);
+        }
+        return ret;
+      });
+    }
+  }
+
+  //
+  //
+  //
+  Future<List<UpnpDeviceInfo>> searchRoutderFromAddress(String address, {bool reuseRouter: false}) async {
+    UpnpDeviceSearcher searcher = null;
+    try {
+      searcher = await UpnpDeviceSearcher.createInstance(this.builder, verbose: _verbose, ip: address);
+      await searcher.searchWanPPPDevice(3);
+      if (searcher.deviceInfoList.length <= 0) {
+        throw {"failed": "not found router"};
+      }
+      return searcher.deviceInfoList;
+    } finally {
+      try {
+        if(searcher != null) {
+           searcher.close();
+        }
+      } catch (e) {}
+    }
   }
 
   void clearSearchedRouterInfo() {

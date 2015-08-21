@@ -44,6 +44,7 @@ class UpnpDeviceSearcher {
 
   HetimaSocketBuilder _socketBuilder = null;
   HetimaUdpSocket _socket = null;
+  HetimaUdpSocket get rawsocket => _socket;
   StreamController<UpnpDeviceInfo> _streamer = new StreamController.broadcast();
   Stream<UpnpDeviceInfo> get onReceive => _streamer.stream;
   List<UpnpDeviceInfo> deviceInfoList = new List();
@@ -66,9 +67,9 @@ class UpnpDeviceSearcher {
     deviceInfoList.clear();
 
     try {
-      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANPPPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
-      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
-      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV2.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT);
+      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANPPPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT).catchError((e){});
+      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV1.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT).catchError((e){});
+      await _socket.send(convert.UTF8.encode(SSDP_M_SEARCH_WANIPConnectionV2.replaceAll("MX: 3", "MX: ${timeoutSec~/2}")), SSDP_ADDRESS, SSDP_PORT).catchError((e){});
     } catch (e) {
       _nowSearching = false;
       throw new UpnpDeviceSearcherException("failed search", UpnpDeviceSearcherException.FAILED_SEARCH);
