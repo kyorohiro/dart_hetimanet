@@ -44,7 +44,6 @@ main() async {
   } catch (e) {
     print("<add ERROR> ${e}");
   }
-  /*
   //
   // end portmap
   try {
@@ -53,5 +52,4 @@ main() async {
   } catch (e) {
     print("<del ERROR> ${e}");
   }
-  */
 }
