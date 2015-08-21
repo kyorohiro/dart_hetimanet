@@ -3,8 +3,6 @@ import 'package:hetimanet/hetimanet_dartio.dart';
 //
 //
 
-import 'dart:isolate';
-
 
 main() async {
   HetimaSocketBuilder builder = new HetimaSocketBuilderDartIO(); 

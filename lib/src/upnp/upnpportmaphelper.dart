@@ -244,11 +244,11 @@ class UpnpPortMapHelper {
     return await Future.wait(ret, eagerError: eagerError);
   }
 
-  Future<GetPortMapInfoResult> _getPortMapInfoFromUpnpDeviceInfo(UpnpDeviceInfo info, String target) {
+  Future<GetPortMapInfoResult> _getPortMapInfoFromUpnpDeviceInfo(UpnpDeviceInfo info, String target) async {
     int index = 0;
     GetPortMapInfoResult result = new GetPortMapInfoResult(info.helperOptAddress);
 
-    tryGetPortMapInfo() async {
+    while(true) {
       UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
       UpnpGetGenericPortMappingResponse res = await pppDevice.requestGetGenericPortMapping(index++);
       if (res.resultCode != 200) {
@@ -265,9 +265,7 @@ class UpnpPortMapHelper {
       if (externalPort.replaceAll(" |\t|\r|\n", "") == "" && ip.replaceAll(" |\t|\r|\n", "") == "") {
         return result;
       }
-      return tryGetPortMapInfo();
     }
-    return tryGetPortMapInfo();
   }
 
   Future<StartGetLocalIPResult> startGetLocalIp() {
