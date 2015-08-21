@@ -59,7 +59,7 @@ void main() {
     if (isDown) {
       httpServer.startServer().then((hetima.HetiHttpStartServerResult v) {
         return portMap.startGetLocalIp();
-      }).then((int v) {
+      }).then((_) {
         portMap.startPortMap();
       }).then((_){
         portMap.startGetExternalIp(reuseRouter: true);
