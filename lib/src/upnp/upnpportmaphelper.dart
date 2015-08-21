@@ -118,29 +118,6 @@ class UpnpPortMapHelper {
     return tryAddPortMap();
   }
 
-  Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, eagerError: false}) {
-    return getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter, eagerError: eagerError).then((List<GetPortMapInfoResult> results) {
-      List<Future> r = [];
-      List<int> externalPortList = [];
-      for (GetPortMapInfoResult result in results) {
-        for (PortMapInfo info in result.infos) {
-          try {
-            int v = int.parse(info.externalPort);
-            if(!externalPortList.contains(v)) {
-              externalPortList.add(v);
-            }
-          } catch (e) {
-            ;
-          }
-        }
-      }
-      r.add(deleteAllPortMap(externalPortList, newProtocol: newProtocol, reuseRouter:true));
-      return Future.wait(r, eagerError: eagerError).then((d) {
-        return new DeleteAllPortMapResult();
-      });
-    });
-  }
-
   Future<List<UpnpDeviceInfo>> searchRoutder({bool reuseRouter: false}) async {
     if (reuseRouter == true && _currentUpnpDeviceInfo.length > 0) {
       return _currentUpnpDeviceInfo;
@@ -202,25 +179,64 @@ class UpnpPortMapHelper {
     _currentUpnpDeviceInfo.clear();
   }
 
-  Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList, {bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP}) {
-    return searchRoutder(reuseRouter: reuseRouter).then((List<UpnpDeviceInfo> deviceInfoList) {
-      List<Future> futures = [];
-      print("########");
-      for (UpnpDeviceInfo info in deviceInfoList) {
-        UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
-        for (int port in deleteExternalPortList) {
-          print("#### port = ${port}");
-          futures.add(pppDevice.requestDeletePortMapping(port, newProtocol));
+  Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, eagerError: false}) async {
+    List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
+    List<Future> r = [];
+    for (UpnpDeviceInfo deviceInfo in deviceInfoList) {
+      List<GetPortMapInfoResult> results = await getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter, eagerError: eagerError, info: deviceInfo);
+      List<int> externalPortList = [];
+
+      for (GetPortMapInfoResult result in results) {
+        for (PortMapInfo info in result.infos) {
+          try {
+            int v = int.parse(info.externalPort);
+            if (!externalPortList.contains(v)) {
+              externalPortList.add(v);
+            }
+          } catch (e) {
+            ;
+          }
         }
       }
-      return Future.wait(futures).then((List<dynamic> d) {
-        return new DeleteAllPortMapResult();
-      });
+      r.add(deleteAllPortMap(externalPortList, newProtocol: newProtocol, reuseRouter: true, info: deviceInfo));
+    }
+    return Future.wait(r, eagerError: eagerError).then((d) {
+      return new DeleteAllPortMapResult();
     });
   }
 
-  Future<List<GetPortMapInfoResult>> getPortMapInfo({String target: null, bool reuseRouter: false, eagerError: true}) async {
-    List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
+  //
+  //
+  //
+  Future<DeleteAllPortMapResult> deleteAllPortMap(List<int> deleteExternalPortList,
+      {bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, UpnpDeviceInfo info: null}) async {
+    List<UpnpDeviceInfo> deviceInfoList = [];
+    if (info == null) {
+      deviceInfoList.addAll(await searchRoutder(reuseRouter: reuseRouter));
+    } else {
+      deviceInfoList.add(info);
+    }
+    List<Future> futures = [];
+    print("########");
+    for (UpnpDeviceInfo info in deviceInfoList) {
+      UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
+      for (int port in deleteExternalPortList) {
+        print("#### port = ${port}");
+        futures.add(pppDevice.requestDeletePortMapping(port, newProtocol));
+      }
+    }
+    return Future.wait(futures).then((List<dynamic> d) {
+      return new DeleteAllPortMapResult();
+    });
+  }
+
+  Future<List<GetPortMapInfoResult>> getPortMapInfo({String target: null, bool reuseRouter: false, eagerError: true, UpnpDeviceInfo info: null}) async {
+    List<UpnpDeviceInfo> deviceInfoList = [];
+    if (info == null) {
+      deviceInfoList.addAll(await searchRoutder(reuseRouter: reuseRouter));
+    } else {
+      deviceInfoList.add(info);
+    }
     List<Future> ret = [];
     for (UpnpDeviceInfo i in deviceInfoList) {
       ret.add(_getPortMapInfoFromUpnpDeviceInfo(i, target));
@@ -230,7 +246,7 @@ class UpnpPortMapHelper {
 
   Future<GetPortMapInfoResult> _getPortMapInfoFromUpnpDeviceInfo(UpnpDeviceInfo info, String target) {
     int index = 0;
-    GetPortMapInfoResult result = new GetPortMapInfoResult();
+    GetPortMapInfoResult result = new GetPortMapInfoResult(info.helperOptAddress);
 
     tryGetPortMapInfo() async {
       UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
@@ -286,7 +302,11 @@ class PortMapInfo {
   String type = "";
 }
 class GetPortMapInfoResult {
+  String address;
   List<PortMapInfo> infos = [];
+  GetPortMapInfoResult(String address) {
+    this.address = address;
+  }
   add(String ip, String internalPort, String externalPort, String description, String type) {
     infos.add(new PortMapInfo()
       ..description = description
