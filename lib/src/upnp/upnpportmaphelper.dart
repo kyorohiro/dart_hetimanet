@@ -144,20 +144,25 @@ class UpnpPortMapHelper {
       _currentUpnpDeviceInfo.clear();
       StartGetLocalIPResult r = await this.startGetLocalIp();
       List<Future> f = [];
-      if(localIp == null) {
-      for (HetimaNetworkInterface i in r.networkInterface) {
-        if (i.prefixLength == 24 && i.address != "127.0.0.1") {
-          f.add(searchRoutderFromAddress(i.address, reuseRouter: reuseRouter));
+      if (localIp == null) {
+        for (HetimaNetworkInterface i in r.networkInterface) {
+          if (i.prefixLength == 24 && i.address != "127.0.0.1") {
+            print("##---> ${i.address}");
+            f.add(searchRoutderFromAddress(i.address, reuseRouter: reuseRouter).catchError((e){}));
+          }
         }
-      }
       } else {
-        f.add(searchRoutderFromAddress(localIp, reuseRouter: reuseRouter));
+        f.add(searchRoutderFromAddress(localIp, reuseRouter: reuseRouter).catchError((e){}));
       }
       List<UpnpDeviceInfo> ret = [];
       return Future.wait(f).then((List<List<UpnpDeviceInfo>> rs) {
-        for (List<UpnpDeviceInfo> r in rs) {
-          _currentUpnpDeviceInfo.addAll(r);
-          ret.addAll(r);
+        if (rs != null) {
+          for (List<UpnpDeviceInfo> r in rs) {
+            if (r != null) {
+              _currentUpnpDeviceInfo.addAll(r);
+              ret.addAll(r);
+            }
+          }
         }
         return ret;
       });
@@ -178,8 +183,8 @@ class UpnpPortMapHelper {
       return searcher.deviceInfoList;
     } finally {
       try {
-        if(searcher != null) {
-           searcher.close();
+        if (searcher != null) {
+          searcher.close();
         }
       } catch (e) {}
     }
