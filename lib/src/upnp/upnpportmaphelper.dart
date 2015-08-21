@@ -70,13 +70,15 @@ class UpnpPortMapHelper {
     _requestedPort = basePort;
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
 
-    UpnpDeviceInfo info = deviceInfoList.first;
-    UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
+//    UpnpDeviceInfo info = deviceInfoList.first;
     int maxRetryExternalPort = _requestedPort + numOfRetry;
 
     tryAddPortMap() async {
       List<Future> r = [];
-      r.add(pppDevice.requestAddPortMapping(_requestedPort, newProtocol, _requestedPort, localIp, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0));
+      for(UpnpDeviceInfo info in deviceInfoList) {
+        UpnpPPPDevice pppDevice = new UpnpPPPDevice(info, verbose: _verbose);
+        r.add(pppDevice.requestAddPortMapping(_requestedPort, newProtocol, _requestedPort, info.helperOptAddress, UpnpPPPDevice.VALUE_ENABLE, appIdDesc, 0).catchError((_){}));
+      }
       List<UpnpAddPortMappingResponse> ress = await Future.wait(r, eagerError: false);
 
       bool have500 = false;
@@ -147,7 +149,6 @@ class UpnpPortMapHelper {
       if (localIp == null) {
         for (HetimaNetworkInterface i in r.networkInterface) {
           if (i.prefixLength == 24 && i.address != "127.0.0.1") {
-            print("##---> ${i.address}");
             f.add(searchRoutderFromAddress(i.address, reuseRouter: reuseRouter).catchError((e){}));
           }
         }
@@ -179,6 +180,11 @@ class UpnpPortMapHelper {
       await searcher.searchWanPPPDevice(3);
       if (searcher.deviceInfoList.length <= 0) {
         throw {"failed": "not found router"};
+      }
+      for(UpnpDeviceInfo i in searcher.deviceInfoList) {
+        if(i != null) {
+          i.helperOptAddress = address;
+        }
       }
       return searcher.deviceInfoList;
     } finally {

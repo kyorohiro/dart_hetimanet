@@ -23,6 +23,7 @@ class UpnpDeviceInfo {
   Map<String, String> _headerMap = {};
   List<UpnpDeviceServiceInfo> _serviceList = [];
   HetimaSocketBuilder socketBuilder;
+  String helperOptAddress = "";
 
   List<UpnpDeviceServiceInfo> get serviceList => _serviceList;
   String _urlBase = "";
