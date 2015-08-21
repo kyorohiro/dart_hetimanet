@@ -4,7 +4,7 @@ import 'package:hetimanet/hetimanet_dartio.dart';
 //
 main()  async {
   HetimaSocketBuilder builder = new HetimaSocketBuilderDartIO(); 
-  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test");
+  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test", ip:"192.168.1.26", port:18080, retry:3);
   //
   // get network interface
   List<HetimaNetworkInterface> interfaces = await builder.getNetworkInterfaces();
@@ -14,8 +14,9 @@ main()  async {
   //
   // portmapping 
   try {
-    StartGetExternalIp exip = await helper.startGetExternalIp(reuseRouter: true);
-    print("<exip> ${exip.externalIp}");
+    for(StartGetExternalIp exip in await helper.startGetExternalIp(reuseRouter: true)) {
+      print("<exip> ${exip.externalIp}");
+    }
   } catch (e) {
     print("<exip ERROR> ${e}");
   }

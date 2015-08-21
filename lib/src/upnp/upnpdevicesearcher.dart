@@ -58,7 +58,7 @@ class UpnpDeviceSearcher {
 
   Future<int> close() => _socket.close();
 
-  Future<dynamic> searchWanPPPDevice([int timeoutSec = 8]) async {
+  Future<dynamic> searchWanPPPDevice([int timeoutSec = 6]) async {
     if (_nowSearching == true) {
       throw new UpnpDeviceSearcherException("already run", UpnpDeviceSearcherException.ALREADY_RUN);
     }
@@ -89,8 +89,11 @@ class UpnpDeviceSearcher {
 
     if (!deviceInfoList.contains(info)) {
       await info.extractService();
-      deviceInfoList.add(info);
-      _streamer.add(info);
+      if(!deviceInfoList.contains(info)){
+        print("find ${info}");
+        deviceInfoList.add(info);
+        _streamer.add(info);
+      }
     }
   }
 
