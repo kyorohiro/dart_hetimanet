@@ -90,7 +90,7 @@ class UpnpDeviceSearcher {
     if (!deviceInfoList.contains(info)) {
       await info.extractService();
       if(!deviceInfoList.contains(info)){
-        print("find ${info}");
+        log("find ${info}");
         deviceInfoList.add(info);
         _streamer.add(info);
       }
