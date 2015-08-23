@@ -52,6 +52,9 @@ class UpnpPortMapHelper {
   // ####
   Future<List<StartGetExternalIp>> startGetExternalIp({bool reuseRouter: false}) async {
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
+    if(deviceInfoList == null || deviceInfoList.length == 0) {
+      throw "not found router";
+    }
     List<String> externalIps = [];
 
     for (UpnpDeviceInfo info in deviceInfoList) {
@@ -71,6 +74,9 @@ class UpnpPortMapHelper {
   Future<StartPortMapResult> startPortMap({bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, eagerError: false}) async {
     _requestedPort = basePort;
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
+    if(deviceInfoList == null || deviceInfoList.length == 0) {
+      throw "not found router";
+    }
 
     int maxRetryExternalPort = _requestedPort + numOfRetry;
 
@@ -181,6 +187,9 @@ class UpnpPortMapHelper {
 
   Future<DeleteAllPortMapResult> deletePortMapFromAppIdDesc({bool reuseRouter: false, newProtocol: UpnpPPPDevice.VALUE_PORT_MAPPING_PROTOCOL_TCP, eagerError: false}) async {
     List<UpnpDeviceInfo> deviceInfoList = await searchRoutder(reuseRouter: reuseRouter);
+    if(deviceInfoList == null || deviceInfoList.length == 0) {
+      throw "not found router";
+    }
     List<Future> r = [];
     for (UpnpDeviceInfo deviceInfo in deviceInfoList) {
       List<GetPortMapInfoResult> results = await getPortMapInfo(target: appIdDesc, reuseRouter: reuseRouter, eagerError: eagerError, info: deviceInfo);
