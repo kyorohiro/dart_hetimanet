@@ -162,7 +162,7 @@ class UpnpPortMapHelper {
     UpnpDeviceSearcher searcher = null;
     try {
       searcher = await UpnpDeviceSearcher.createInstance(this.builder, verbose: _verbose, ip: address);
-      await searcher.searchWanPPPDevice(3);
+      await searcher.searchWanPPPDevice(6);
       if (searcher.deviceInfoList.length <= 0) {
         throw {"failed": "not found router"};
       }

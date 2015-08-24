@@ -6,7 +6,7 @@ import 'package:hetimanet/hetimanet_dartio.dart';
 
 main() async {
   HetimaSocketBuilder builder = new HetimaSocketBuilderDartIO(); 
-  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test", ip:"0.0.0.0", port:18080, retry:3);
+  UpnpPortMapHelper helper = new UpnpPortMapHelper(builder, "test", ip:"0.0.0.0", port:18080, retry:3, verbose:false);
 
   //
   // get network interface
