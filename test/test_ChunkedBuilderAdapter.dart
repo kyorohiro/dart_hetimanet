@@ -18,7 +18,7 @@ void main() {
     a.start();
     builder.appendString("3\r\nabc");
   }
- /*
+ 
   {
     hetima.HetiTestTicket ticket = test.test("ChunkedBuilderAdapter_b", 3000);
     hetima.ArrayBuilder builder = new hetima.ArrayBuilder();
@@ -85,5 +85,4 @@ void main() {
     });
 
   }
-   */
 }
