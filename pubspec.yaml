@@ -5,8 +5,6 @@ dependencies:
   chrome: any
   hetimacore:
     git: https://github.com/kyorohiro/dart_hetimacore.git
-  hetimaregex:
-    git: https://github.com/kyorohiro/dart_hetimaregex.git
   xml: any
 dev_dependencies:
   unittest: '>=0.11.0 <0.12.0'
