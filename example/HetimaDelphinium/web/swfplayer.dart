@@ -7,7 +7,7 @@ class SwfPlayerBuffer {
   static hetima.HetimaData createPlayerswf() {
     List<int> buffer = crypt.CryptoUtils.base64StringToBytes(playerswf);
     hetima.ArrayBuilder builder = new hetima.ArrayBuilder.fromList(buffer);
-    return new hetima.HetimaBuilderToFile(builder);
+    return new hetima.HetimaReaderToData(builder);
   }
 
 
