@@ -1,29 +1,43 @@
 library hetimanet.util.ip;
 
 class HetiIP {
-  static List<int> toRawIP(String ip) {
-    List rawIP = [];
+  static List<int> toRawIP(String ip, {List<int> output}) {
+    List rawIP = null;
     if (ip.contains(".")) {
       // ip v4
+      if(output == null || output.length >= 4) {
+        rawIP = new List(4);
+      } else {
+        rawIP = output;
+      }
       List<String> v = ip.split(".");
       if (v.length < 4) {
         throw new Exception();
       }
-      rawIP.add(int.parse(v[0]));
-      rawIP.add(int.parse(v[1]));
-      rawIP.add(int.parse(v[2]));
-      rawIP.add(int.parse(v[3]));
+      rawIP[0] = int.parse(v[0]);
+      rawIP[1] = int.parse(v[1]);
+      rawIP[2] = int.parse(v[2]);
+      rawIP[3] = int.parse(v[3]);
     } else if (ip.contains(":")) {
       // ip v6
+      if(output == null|| output.length >= 16) {
+        rawIP = new List(16);
+      } else {
+        rawIP = output;
+      }
+      int i = 0;
       List<String> vv = ip.split(":");
       for(String v in vv) {
         if(v.length == 0) {
           int r = 8-vv.length+1;
-          for(int i=0;i<r;i++) {
-            rawIP.addAll([0,0]);
+          for(int o=0;o<r;o++) {
+            rawIP[i++] = 0;
+            rawIP[i++] = 0;
           }
         } else {
-          rawIP.addAll(_toIP6RawPart(int.parse(v,radix:16)));
+          int s = int.parse(v,radix:16);
+          rawIP[i++] = (0xff & (s >> 8));
+          rawIP[i++] = (0xff & s);
         }
       }
     } else {
@@ -32,12 +46,6 @@ class HetiIP {
     return rawIP;
   }
 
-  static List<int> _toIP6RawPart(int v) {
-    List<int> ret = [];
-    ret.add(0xff & (v >> 8));
-    ret.add(0xff & (v));
-    return ret;
-  }
 
   static String toIPString(List<int> rawIP) {
     if (rawIP.length == 4) {
