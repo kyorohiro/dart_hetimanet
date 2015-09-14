@@ -1,5 +1,7 @@
 part of hetimanet.dartio;
 
+
+
 class HetimaSocketBuilderDartIO extends HetimaSocketBuilder {
   bool _verbose = false;
   bool get verbose => _verbose;
@@ -70,6 +72,7 @@ class HetimaServerSocketDartIo extends HetimaServerSocket {
 }
 
 class HetimaSocketDartIo extends HetimaSocket {
+  static Random _random = new Random(new DateTime.now().millisecond);
   bool _verbose = false;
   bool get verbose => _verbose;
   Socket _socket = null;
@@ -102,8 +105,7 @@ class HetimaSocketDartIo extends HetimaSocket {
       }
       int n = 0;
       if(hosts.length > 1){
-        Random r = new Random(new DateTime.now().millisecond);
-        n = r.nextInt(hosts.length-1);
+        n = _random.nextInt(hosts.length-1);
       }
       
       _socket = await Socket.connect(hosts[n], peerPort);
@@ -163,6 +165,7 @@ class HetimaSocketDartIo extends HetimaSocket {
 }
 
 class HetimaUdpSocketDartIo extends HetimaUdpSocket {
+  static Random _random = new Random(new DateTime.now().millisecond);
   bool _verbose = false;
   bool get verbose => _verbose;
   RawDatagramSocket _udpSocket = null;
@@ -210,6 +213,11 @@ class HetimaUdpSocketDartIo extends HetimaUdpSocket {
   @override
   async.Future<HetimaUdpSendInfo> send(List<int> buffer, String address, int port) async {
     try {
+      int n = 0;
+      List<InternetAddress> hosts = await InternetAddress.lookup(address);
+      if(hosts.length > 1){
+        n = _random.nextInt(hosts.length-1);
+      }
       _udpSocket.send(buffer, new InternetAddress(address), port);
       return await new HetimaUdpSendInfo(0);
     } catch (e) {
