@@ -15,22 +15,24 @@ class HetiIP {
       rawIP.add(int.parse(v[3]));
     } else if (ip.contains(":")) {
       // ip v6
-      List<String> v = ip.split(":");
-      rawIP.addAll(_toIP4RawPart(int.parse(v[0],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[1],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[2],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[3],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[4],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[5],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[6],radix:16)));
-      rawIP.addAll(_toIP4RawPart(int.parse(v[7],radix:16)));
+      List<String> vv = ip.split(":");
+      for(String v in vv) {
+        if(v.length == 0) {
+          int r = 8-vv.length+1;
+          for(int i=0;i<r;i++) {
+            rawIP.addAll([0,0]);
+          }
+        } else {
+          rawIP.addAll(_toIP6RawPart(int.parse(v,radix:16)));
+        }
+      }
     } else {
       throw new Exception();
     }
     return rawIP;
   }
 
-  static List<int> _toIP4RawPart(int v) {
+  static List<int> _toIP6RawPart(int v) {
     List<int> ret = [];
     ret.add(0xff & (v >> 8));
     ret.add(0xff & (v));
