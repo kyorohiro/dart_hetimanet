@@ -10,6 +10,9 @@ void main() {
     unit.test("127.0.255.1", () {
       unit.expect(HetiIP.toRawIP("127.0.255.1"), [127, 0, 255, 1]);
     });
+    unit.test("0.0.255.1", () {
+      unit.expect(HetiIP.toRawIP("0.0.255.1"), [0, 0, 255, 1]);
+    });
   });
 
   unit.group("v6", () {
