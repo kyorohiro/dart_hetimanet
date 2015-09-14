@@ -13,6 +13,14 @@ void main() {
     unit.test("0.0.255.1", () {
       unit.expect(HetiIP.toRawIP("0.0.255.1"), [0, 0, 255, 1]);
     });
+    unit.test("www.a.exsample.com", () async {
+      try {
+        unit.expect(HetiIP.toRawIP("www.a.exsample.com"), [0, 0, 255, 1]);
+        unit.expect(true, false);
+      } catch(e) {
+        
+      }
+    });
   });
 
   unit.group("v6", () {

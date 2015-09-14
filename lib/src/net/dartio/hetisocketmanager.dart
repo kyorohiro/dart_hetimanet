@@ -1,7 +1,5 @@
 part of hetimanet.dartio;
 
-
-
 class HetimaSocketBuilderDartIO extends HetimaSocketBuilder {
   bool _verbose = false;
   bool get verbose => _verbose;
@@ -95,20 +93,23 @@ class HetimaSocketDartIo extends HetimaSocket {
     if (_nowConnecting == true || _socket != null) {
       throw "connecting now";
     }
-    
 
-    _nowConnecting = true;
     try {
+      HetiIP.toRawIP(peerAddress);
+    } catch (e) {
       List<InternetAddress> hosts = await InternetAddress.lookup(peerAddress);
-      if(hosts == null || hosts.length == 0) {
-        throw {"error":"not found ip from host ${peerAddress}"};
+      if (hosts == null || hosts.length == 0) {
+        throw {"error": "not found ip from host ${peerAddress}"};
       }
       int n = 0;
-      if(hosts.length > 1){
-        n = _random.nextInt(hosts.length-1);
+      if (hosts.length > 1) {
+        n = _random.nextInt(hosts.length - 1);
       }
-      
-      _socket = await Socket.connect(hosts[n], peerPort);
+      peerAddress = hosts[n].address;
+    }
+    try {
+      _nowConnecting = true;
+      _socket = await Socket.connect(peerAddress, peerPort);
       _socket.listen((List<int> data) {
         log('<<<lis>>> '); //${data.length} ${UTF8.decode(data)}');
         this.buffer.appendIntList(data, 0, data.length);
@@ -213,10 +214,18 @@ class HetimaUdpSocketDartIo extends HetimaUdpSocket {
   @override
   async.Future<HetimaUdpSendInfo> send(List<int> buffer, String address, int port) async {
     try {
-      int n = 0;
-      List<InternetAddress> hosts = await InternetAddress.lookup(address);
-      if(hosts.length > 1){
-        n = _random.nextInt(hosts.length-1);
+      try {
+        HetiIP.toRawIP(address);
+      } catch (e) {
+        List<InternetAddress> hosts = await InternetAddress.lookup(address);
+        if (hosts == null || hosts.length == 0) {
+          throw {"error": "not found ip from host ${address}"};
+        }
+        int n = 0;
+        if (hosts.length > 1) {
+          n = _random.nextInt(hosts.length - 1);
+        }
+        address = hosts[n].address;
       }
       _udpSocket.send(buffer, new InternetAddress(address), port);
       return await new HetimaUdpSendInfo(0);
