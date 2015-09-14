@@ -86,14 +86,27 @@ class HetimaSocketDartIo extends HetimaSocket {
   bool _nowConnecting = false;
   async.StreamController<HetimaCloseInfo> _closeStream = new async.StreamController.broadcast();
   async.StreamController<HetimaReceiveInfo> _receiveStream = new async.StreamController.broadcast();
+
   @override
   async.Future<HetimaSocket> connect(String peerAddress, int peerPort) async {
     if (_nowConnecting == true || _socket != null) {
       throw "connecting now";
     }
+    
+
     _nowConnecting = true;
     try {
-      _socket = await Socket.connect(peerAddress, peerPort);
+      List<InternetAddress> hosts = await InternetAddress.lookup(peerAddress);
+      if(hosts == null || hosts.length == 0) {
+        throw {"error":"not found ip from host ${peerAddress}"};
+      }
+      int n = 0;
+      if(hosts.length > 1){
+        Random r = new Random(new DateTime.now().millisecond);
+        n = r.nextInt(hosts.length-1);
+      }
+      
+      _socket = await Socket.connect(hosts[n], peerPort);
       _socket.listen((List<int> data) {
         log('<<<lis>>> '); //${data.length} ${UTF8.decode(data)}');
         this.buffer.appendIntList(data, 0, data.length);
