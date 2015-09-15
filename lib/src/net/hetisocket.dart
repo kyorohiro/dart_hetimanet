@@ -41,6 +41,11 @@ abstract class HetimaSocket {
   void updateTime() {
     lastUpdateTime = (new DateTime.now()).millisecondsSinceEpoch;
   }
+
+  async.Future clearBuffer() async {
+    buffer.clearInnerBuffer(buffer.size(),reuse:false);
+    buffer.clear();
+  }
 }
 
 abstract class HetimaUdpSocket {
