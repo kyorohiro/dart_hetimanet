@@ -26,7 +26,8 @@ class HetimaServerSocketError {
 
 abstract class HetimaSocket {
   int lastUpdateTime = 0;
-  heti.ArrayBuilder buffer = new heti.ArrayBuilder();
+  heti.ArrayBuilder _buffer = new heti.ArrayBuilder();
+  heti.ArrayBuilder get buffer => _buffer;
   async.Future<HetimaSocket> connect(String peerAddress, int peerPort) ;
   async.Future<HetimaSendInfo> send(List<int> data);
   async.Future<HetimaSocketInfo> getSocketInfo();
@@ -34,7 +35,7 @@ abstract class HetimaSocket {
   async.Stream<HetimaCloseInfo> onClose;
   bool isClosed = false;
   void close() {
-    buffer.immutable = true;
+    _buffer.immutable = true;
     isClosed = true;
   }
 
@@ -43,8 +44,8 @@ abstract class HetimaSocket {
   }
 
   async.Future clearBuffer() async {
-    buffer.clearInnerBuffer(buffer.size(),reuse:false);
-    buffer.clear();
+    _buffer.clearInnerBuffer(_buffer.size(),reuse:false);
+    _buffer.clear();
   }
 }
 
