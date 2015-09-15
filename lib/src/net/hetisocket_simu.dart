@@ -4,13 +4,13 @@ import 'dart:async';
 import 'hetisocket.dart';
 
 class HetiSocketBuilderSimu extends HetimaSocketBuilder {
-  HetimaSocket createClient() {
+  HetimaSocket createClient({int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
     return null;
   }
   HetimaUdpSocket createUdpClient() {
     return new HetiUdpSocketSimu();
   }
-  Future<HetimaServerSocket> startServer(String address, int port) {
+  Future<HetimaServerSocket> startServer(String address, int port, {int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
     return null;
   }
   Future<List<HetimaNetworkInterface>> getNetworkInterfaces() {

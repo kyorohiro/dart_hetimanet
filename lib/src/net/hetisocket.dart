@@ -3,9 +3,11 @@ import 'dart:async' as async;
 import 'package:hetimacore/hetimacore.dart' as heti;
 
 abstract class HetimaSocketBuilder {
-  HetimaSocket createClient();
+  static const int BUFFER_NOTIFY = 0;  
+  static const int BUFFER_ONLY = 1;  
+  HetimaSocket createClient({int mode:BUFFER_NOTIFY});
   HetimaUdpSocket createUdpClient();
-  async.Future<HetimaServerSocket> startServer(String address, int port) ;
+  async.Future<HetimaServerSocket> startServer(String address, int port, {int mode:BUFFER_NOTIFY}) ;
   async.Future<List<HetimaNetworkInterface>> getNetworkInterfaces(); 
 }
 

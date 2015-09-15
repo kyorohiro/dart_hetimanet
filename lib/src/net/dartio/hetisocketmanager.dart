@@ -8,12 +8,12 @@ class HetimaSocketBuilderDartIO extends HetimaSocketBuilder {
     _verbose = verbose;
   }
 
-  HetimaSocket createClient() {
-    return new HetimaSocketDartIo(verbose: _verbose);
+  HetimaSocket createClient({int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
+    return new HetimaSocketDartIo(verbose: _verbose,mode:mode);
   }
 
-  async.Future<HetimaServerSocket> startServer(String address, int port) async {
-    return HetimaServerSocketDartIo.startServer(address, port, verbose: _verbose);
+  async.Future<HetimaServerSocket> startServer(String address, int port, {int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) async {
+    return HetimaServerSocketDartIo.startServer(address, port, verbose: _verbose, mode:mode);
   }
 
   HetimaUdpSocket createUdpClient() {
@@ -45,17 +45,21 @@ class HetimaServerSocketDartIo extends HetimaServerSocket {
 
   ServerSocket _server = null;
   async.StreamController<HetimaSocket> _acceptStream = new async.StreamController.broadcast();
+  int _mode = 0;
 
-  HetimaServerSocketDartIo(ServerSocket server, {verbose: false}) {
+  HetimaServerSocketDartIo(ServerSocket server, {verbose: false, int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
     _verbose = verbose;
     _server = server;
+    _mode = mode;
     _server.listen((Socket socket) {
-      _acceptStream.add(new HetimaSocketDartIo.fromSocket(socket, verbose: _verbose));
+      _acceptStream.add(new HetimaSocketDartIo.fromSocket(socket, verbose: _verbose, mode:mode));
     });
   }
-  static async.Future<HetimaServerSocket> startServer(String address, int port, {verbose: false}) async {
+
+  static async.Future<HetimaServerSocket> startServer(String address, int port, 
+      {verbose: false,int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) async {
     ServerSocket server = await ServerSocket.bind(address, port);
-    return new HetimaServerSocketDartIo(server, verbose: verbose);
+    return new HetimaServerSocketDartIo(server, verbose: verbose, mode:mode);
   }
 
   @override
@@ -74,14 +78,17 @@ class HetimaSocketDartIo extends HetimaSocket {
   bool _verbose = false;
   bool get verbose => _verbose;
   Socket _socket = null;
+  int _mode = 0;
 
-  HetimaSocketDartIo({verbose: false}) {
+  HetimaSocketDartIo({verbose: false, int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
     _verbose = verbose;
+    _mode = mode;
   }
 
-  HetimaSocketDartIo.fromSocket(Socket socket, {verbose: false}) {
+  HetimaSocketDartIo.fromSocket(Socket socket, {verbose: false, int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
     _verbose = verbose;
     _socket = socket;
+    _mode = mode;
   }
 
   bool _nowConnecting = false;
@@ -113,7 +120,11 @@ class HetimaSocketDartIo extends HetimaSocket {
       _socket.listen((List<int> data) {
         log('<<<lis>>> '); //${data.length} ${UTF8.decode(data)}');
         this.buffer.appendIntList(data, 0, data.length);
-        _receiveStream.add(new HetimaReceiveInfo(data));
+        List<int> b= [];
+        if(_mode == HetimaSocketBuilder.BUFFER_NOTIFY) {
+          b = data;
+        }
+        _receiveStream.add(new HetimaReceiveInfo(b));
       }, onDone: () {
         log('<<<Done>>>');
         _socket.close();

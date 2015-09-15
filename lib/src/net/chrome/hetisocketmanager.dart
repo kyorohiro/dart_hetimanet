@@ -1,12 +1,12 @@
 part of hetimanet.chrome;
 
 class HetimaSocketBuilderChrome extends HetimaSocketBuilder {
-  HetimaSocket createClient() {
-    return new HetimaSocketChrome.empty();
+  HetimaSocket createClient({int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
+    return new HetimaSocketChrome.empty(mode:mode);
   }
 
-  Future<HetimaServerSocket> startServer(String address, int port) {
-    return HetimaServerSocketChrome.startServer(address, port);
+  Future<HetimaServerSocket> startServer(String address, int port, {int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
+    return HetimaServerSocketChrome.startServer(address, port, mode:mode);
   }
 
   HetimaUdpSocket createUdpClient() {

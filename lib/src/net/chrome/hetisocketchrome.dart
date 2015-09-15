@@ -2,15 +2,22 @@ part of hetimanet.chrome;
 
 class HetimaSocketChrome extends HetimaSocket {
   bool _isClose = false;
+  int _mode = HetimaSocketBuilder.BUFFER_NOTIFY;
+  int get mode => _mode; 
   int clientSocketId;
+
   StreamController<HetimaReceiveInfo> _controllerReceive = new StreamController.broadcast();
   StreamController<HetimaCloseInfo> _controllerClose = new StreamController.broadcast();
-  HetimaSocketChrome.empty() {}
 
-  HetimaSocketChrome(int _clientSocketId) {
+  HetimaSocketChrome.empty({int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
+    _mode = mode;
+  }
+
+  HetimaSocketChrome(int _clientSocketId,{int mode:HetimaSocketBuilder.BUFFER_NOTIFY}) {
     HetimaChromeSocketManager.getInstance().addClient(_clientSocketId, this);
     chrome.sockets.tcp.setPaused(_clientSocketId, false);
     clientSocketId = _clientSocketId;
+    _mode = mode;
   }
 
   Stream<HetimaReceiveInfo> get onReceive => _controllerReceive.stream;
@@ -19,7 +26,11 @@ class HetimaSocketChrome extends HetimaSocket {
     updateTime();
     List<int> tmp = info.data.getBytes();
     buffer.appendIntList(tmp, 0, tmp.length);
-    _controllerReceive.add(new HetimaReceiveInfo(info.data.getBytes()));
+    List<int> b= [];
+    if(_mode == HetimaSocketBuilder.BUFFER_NOTIFY) {
+      b = info.data.getBytes();
+    }
+    _controllerReceive.add(new HetimaReceiveInfo(b));
   }
 
   Future<HetimaSendInfo> send(List<int> data) async {
